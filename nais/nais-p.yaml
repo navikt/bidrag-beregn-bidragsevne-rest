@@ -1,0 +1,38 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: bidrag-beregn-bidragsevne-rest
+  namespace: {{ namespace }}
+  labels:
+    team: bidrag
+spec:
+  image: {{ image }}
+  port: 8080
+  liveness:
+    path: /bidrag-beregn-bidragsevne-rest/actuator/health
+    initialDelay: 20
+    timeout: 1
+    periodSeconds: 5
+    failureThreshold: 10
+  readiness:
+    path: /bidrag-beregn-bidragsevne-rest/actuator/health
+    initialDelay: 20
+    timeout: 1
+  prometheus:
+    enabled: true
+    path: /bidrag-beregn-bidragsevne-rest/actuator/prometheus
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  ingresses:
+    - https://bidrag-beregn-bidragsevne-rest.nais.adeo.no/
+    - https://bidrag-beregn-bidragsevne-rest.prod-fss.nais.io
+  vault:
+    enabled: false
+  env:
+    - name: SJABLON_URL
+      value: https://bidrag-sjablon.nais.adeo.no/bidrag-sjablon
