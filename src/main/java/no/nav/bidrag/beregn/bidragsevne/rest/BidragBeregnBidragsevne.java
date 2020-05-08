@@ -3,6 +3,7 @@ package no.nav.bidrag.beregn.bidragsevne.rest;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.SjablonConsumer;
 import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
 import no.nav.bidrag.commons.ExceptionLogger;
+import no.nav.bidrag.commons.web.CorrelationIdFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -27,7 +28,12 @@ public class BidragBeregnBidragsevne {
     return new ExceptionLogger(BidragBeregnBidragsevne.class.getSimpleName());
   }
 
-	public static void main(String[] args) {
+  @Bean
+  public CorrelationIdFilter correlationIdFilter() {
+    return new CorrelationIdFilter();
+  }
+
+  public static void main(String[] args) {
 		SpringApplication.run(BidragBeregnBidragsevne.class, args);
 	}
 }
