@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 
 public class SjablonConsumer {
@@ -26,7 +27,12 @@ public class SjablonConsumer {
     var sjablonResponse = restTemplate.exchange(sjablonUrl, HttpMethod.GET, null, SJABLONTALL_LISTE);
 
     if (sjablonResponse == null) {
-      return null;
+      return new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ukjent feil ved kall av bidrag-sjablon");
+    }
+
+    if (!(sjablonResponse.getStatusCode().is2xxSuccessful())) {
+      LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+      return new HttpStatusResponse(sjablonResponse.getStatusCode(), sjablonResponse.getHeaders().toString());
     }
 
     LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());

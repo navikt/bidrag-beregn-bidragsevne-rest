@@ -2,6 +2,7 @@ package no.nav.bidrag.beregn.bidragsevne.rest;
 
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.SjablonConsumer;
 import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
+import no.nav.bidrag.commons.ExceptionLogger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,6 +20,11 @@ public class BidragBeregnBidragsevne {
   @Bean
   public SjablonConsumer sjablonConsumer(@Value("${SJABLON_URL}") String sjablonBaseUrl, RestTemplate restTemplate) {
     return new SjablonConsumer(restTemplate, sjablonBaseUrl);
+  }
+
+  @Bean
+  public ExceptionLogger exceptionLogger() {
+    return new ExceptionLogger(BidragBeregnBidragsevne.class.getSimpleName());
   }
 
 	public static void main(String[] args) {

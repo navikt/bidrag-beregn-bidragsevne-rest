@@ -39,11 +39,6 @@ public class BeregnBidragsevneService {
 
     var sjablonResponse = sjablonConsumer.hentSjablontall();
 
-    if (sjablonResponse == null) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon. Ingen respons");
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon. Ingen respons");
-    }
-
     if (!(sjablonResponse.getHttpStatus().is2xxSuccessful())) {
       LOGGER.error("Feil ved kall av bidrag-sjablon. Status: {}", sjablonResponse.getHttpStatus().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon. Status: " + sjablonResponse.getHttpStatus().toString() + " Melding: " +

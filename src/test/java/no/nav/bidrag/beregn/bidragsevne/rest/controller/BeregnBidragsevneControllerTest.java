@@ -46,8 +46,8 @@ class BeregnBidragsevneControllerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere bidragsevne resultat")
-  void skalReturnereBidragsevneResultat() {
+  @DisplayName("Skal returnere bidragsevne resultat ved gyldig input")
+  void skalReturnereBidragsevneResultatVedGyldigInput() {
 
     when(beregnBidragsevneServiceMock.beregn(any(BeregnBidragsevneGrunnlagAltCore.class)))
         .thenReturn(new HttpStatusResponse(OK, TestUtil.dummyBidragsevneResultat()));
@@ -71,8 +71,8 @@ class BeregnBidragsevneControllerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere 400 Bad Request")
-  void skalReturnere400BadRequest() {
+  @DisplayName("Skal returnere 400 Bad Request når input data mangler")
+  void skalReturnere400BadRequestNårInputDataMangler() {
 
     var url = "http://localhost:" + port + "/bidrag-beregn-bidragsevne-rest/beregn/bidragsevne";
     var request = initHttpEntity(TestUtil.byggBidragsevneGrunnlagUtenBostatusKode());
@@ -84,8 +84,8 @@ class BeregnBidragsevneControllerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere 500 Internal Server Error")
-  void skalReturnere500InternalServerError() {
+  @DisplayName("Skal returnere 500 Internal Server Error når kall til servicen feiler")
+  void skalReturnere500InternalServerErrorNårKallTilServicenFeiler() {
 
     when(beregnBidragsevneServiceMock.beregn(any(BeregnBidragsevneGrunnlagAltCore.class)))
         .thenReturn(new HttpStatusResponse(INTERNAL_SERVER_ERROR, null));

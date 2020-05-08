@@ -41,8 +41,8 @@ class BeregnBidragsevneServiceTest {
   }
 
   @Test
-  @DisplayName("Skal beregne bidragsevne")
-  void skalBeregneBidragsevne() {
+  @DisplayName("Skal beregne bidragsevne når retur fra SjablonConsumer og BidragsevneCore er OK")
+  void skalBeregneBidragsevneNårReturFraSjablonConsumerOgBidragsevneCoreErOk() {
     var grunnlagTilCoreCaptor = ArgumentCaptor.forClass(BeregnBidragsevneGrunnlagAltCore.class);
     when(sjablonConsumerMock.hentSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonListe()));
     when(bidragsevneCoreMock.beregnBidragsevne(grunnlagTilCoreCaptor.capture())).thenReturn(TestUtil.dummyBidragsevneResultatCore());
@@ -61,22 +61,12 @@ class BeregnBidragsevneServiceTest {
   }
 
   @Test
-  @DisplayName("Null retur fra SjablonConsumer")
-  void nullReturFraSjablonConsumer() {
-    when(sjablonConsumerMock.hentSjablontall()).thenReturn(null);
-
-    assertThatExceptionOfType(SjablonConsumerException.class)
-        .isThrownBy(() -> beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore()))
-        .withMessage("Feil ved kall av bidrag-sjablon. Ingen respons");
-  }
-
-  @Test
-  @DisplayName("Feil retur fra SjablonConsumer")
-  void feilReturFraSjablonConsumer() {
+  @DisplayName("Skal kaste SjablonConsumerException ved feil retur fra SjablonConsumer")
+  void SkalKasteSjablonConsumerExceptionVedFeilReturFraSjablonConsumer() {
     Map<String, String> body = new HashMap<>();
-    body.put("error code", "204");
-    body.put("error msg", "NO_CONTENT");
-    body.put("error text", "Ingen sjablonverdier funnet");
+    body.put("error code", "503");
+    body.put("error msg", "SERVICE_UNAVAILABLE");
+    body.put("error text", "Service utilgjengelig");
     when(sjablonConsumerMock.hentSjablontall()).thenReturn(new HttpStatusResponse(HttpStatus.SERVICE_UNAVAILABLE, body.toString()));
 
     assertThatExceptionOfType(SjablonConsumerException.class)
@@ -86,8 +76,8 @@ class BeregnBidragsevneServiceTest {
 
 
   @Test
-  @DisplayName("Feil i kontroll av input")
-  void feilIKontrollAvInput() {
+  @DisplayName("Skal kaste UgyldigInputException ved feil retur fra BidragsevneCore")
+  void SkalKasteUgyldigInputExceptionVedFeilReturFraBidragsevneCore() {
     when(sjablonConsumerMock.hentSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonListe()));
     when(bidragsevneCoreMock.beregnBidragsevne(any())).thenReturn(TestUtil.dummyBidragsevneResultatCoreMedAvvik());
 
