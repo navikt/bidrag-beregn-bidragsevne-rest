@@ -1,13 +1,18 @@
 package no.nav.bidrag.beregn.bidragsevne.rest.service;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+import no.nav.bidrag.beregn.bidragsevne.rest.consumer.Bidragsevne;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.SjablonConsumer;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.Sjablontall;
+import no.nav.bidrag.beregn.bidragsevne.rest.consumer.TrinnvisSkattesats;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneResultat;
 import no.nav.bidrag.beregn.bidragsevne.rest.exception.SjablonConsumerException;
 import no.nav.bidrag.beregn.bidragsevne.rest.exception.UgyldigInputException;
@@ -27,8 +32,55 @@ public class BeregnBidragsevneService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BeregnBidragsevneService.class);
 
+  private final static String ENSLIG = "EN";
+  private final static String GIFT_SAMBOER = "GS";
+
   private final SjablonConsumer sjablonConsumer;
   private final BidragsevneCore bidragsevneCore;
+
+  private final Map<String, String> sjablontallMap = new HashMap<>() {{
+    put("0001", "OrdinaerBarnetrygdBelop");
+    put("0002", "OrdinaerSmabarnstilleggBelop");
+    put("0003", "BoutgifterBidragsbarnBelop");
+    put("0004", "FordelSkatteklasse2Belop");
+    put("0005", "ForskuddssatsBelop");
+    put("0006", "InnslagKapitalinntektBelop");
+    put("0007", "InntektsintervallTilleggsbidragBelop");
+    put("0008", "MaksInntektBPProsent");
+    put("0009", "HoyInntektBPMultiplikator");
+    put("0010", "InntektBBMultiplikator");
+    put("0011", "MaksBidragMultiplikator");
+    put("0012", "MaksInntektBBMultiplikator");
+    put("0013", "MaksInntektForskuddMottakerMultiplikator");
+    put("0014", "NedreInntektsgrenseGebyrBelop");
+    put("0015", "SkattAlminneligInntektProsent");
+    put("0016", "TilleggsbidragProsent");
+    put("0017", "TrygdeavgiftProsent");
+    put("0018", "BarnetilleggSkattProsent");
+    put("0019", "UnderholdEgneBarnIHusstandBelop");
+    put("0020", "EndringBidragGrenseProsent");
+    put("0021", "BarnetilleggForsvaretForsteBarnBelop");
+    put("0022", "BarnetilleggForsvaretOvrigeBarnBelop");
+    put("0023", "MinstefradragInntektBelop");
+    put("0024", "GjennomsnittVirkedagerPrManedAntall");
+    put("0025", "MinstefradragInntektProsent");
+    put("0026", "DagligSatsBarnetilleggBelop");
+    put("0027", "PersonfradragKlasse1Belop");
+    put("0028", "PersonfradragKlasse2Belop");
+    put("0029", "KontantstotteBelop");
+    put("0030", "OvreInntektsgrenseIkkeISkatteposisjonBelop");
+    put("0031", "NedreInntektsgrenseFullSkatteposisjonBelop");
+    put("0032", "EkstraSmabarnstilleggBelop");
+    put("0033", "OvreInntektsgrenseFulltForskuddBelop");
+    put("0034", "OvreInntektsgrense75ProsentForskuddEnBelop");
+    put("0035", "OvreInntektsgrense75ProsentForskuddGSBelop");
+    put("0036", "InntektsintervallForskuddBelop");
+    put("0037", "OvreGrenseSaertilskuddBelop");
+    put("0038", "Forskuddssats75ProsentBelop");
+    put("0039", "FordelSaerfradragBelop");
+    put("0040", "SkattesatsAlminneligInntektProsent");
+    put("0100", "FastsettelsesgebyrBelop");
+  }};
 
   public BeregnBidragsevneService(SjablonConsumer sjablonConsumer, BidragsevneCore bidragsevneCore) {
     this.sjablonConsumer = sjablonConsumer;
@@ -37,177 +89,105 @@ public class BeregnBidragsevneService {
 
   public HttpStatusResponse<BeregnBidragsevneResultat> beregn(BeregnBidragsevneGrunnlagAltCore grunnlagTilCore) {
 
-    var sjablonResponse = sjablonConsumer.hentSjablontall();
+    // Henter sjabloner for sjablontall
+    var sjablonTallResponse = sjablonConsumer.hentSjablonSjablontall();
 
-    if (!(sjablonResponse.getHttpStatus().is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon. Status: {}", sjablonResponse.getHttpStatus().toString());
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon. Status: " + sjablonResponse.getHttpStatus().toString() + " Melding: " +
-          sjablonResponse.getBody());
+    if (!(sjablonTallResponse.getHttpStatus().is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}", sjablonTallResponse.getHttpStatus().toString());
+      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonTallResponse.getHttpStatus().toString()
+          + " Melding: " + sjablonTallResponse.getBody());
     }
 
-//    grunnlagTilCore.setSjablonPeriodeListe(mapSjablonVerdier(sjablonResponse.getBody()));
-    grunnlagTilCore.setSjablonPeriodeListe(mapSjablonVerdierTemp());
+    // Henter sjabloner for bidragsevne
+    var sjablonBidragsevneResponse = sjablonConsumer.hentSjablonBidragsevne();
 
+    if (!(sjablonBidragsevneResponse.getHttpStatus().is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}", sjablonBidragsevneResponse.getHttpStatus().toString());
+      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (bidragsevne). Status: "
+          + sjablonBidragsevneResponse.getHttpStatus().toString() + " Melding: " + sjablonBidragsevneResponse.getBody());
+    }
+
+    // Henter sjabloner for trinnvis skattesats
+    var sjablonTrinnvisSkattesatsResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
+
+    if (!(sjablonTrinnvisSkattesatsResponse.getHttpStatus().is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}", sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString());
+      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: "
+          + sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse.getBody());
+    }
+
+    // Populerer liste over aktuelle sjabloner til core basert på sjablonene som er hentet
+    var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
+    sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonTallResponse.getBody()));
+    sjablonPeriodeListe.addAll(mapSjablonBidragsevne(sjablonBidragsevneResponse.getBody()));
+    var sortertSjablonTrinnvisSkattesatsListe = sjablonTrinnvisSkattesatsResponse.getBody().stream().sorted(comparing(TrinnvisSkattesats::getDatoFom)
+        .thenComparing(TrinnvisSkattesats::getDatoTom).thenComparing(TrinnvisSkattesats::getInntektgrense)).collect(toList());
+    sjablonPeriodeListe.addAll(mapSjablonTrinnvisSkattesats(sortertSjablonTrinnvisSkattesatsListe));
+    grunnlagTilCore.setSjablonPeriodeListe(sjablonPeriodeListe);
+
+    // Kaller core-modulen for beregning av bidragsevne
     LOGGER.debug("Bidragsevne - grunnlag for beregning: {}", grunnlagTilCore);
     var resultatFraCore = bidragsevneCore.beregnBidragsevne(grunnlagTilCore);
 
-    if (!resultatFraCore.getAvviksListe().isEmpty()) {
+    if (!resultatFraCore.getAvvikListe().isEmpty()) {
       LOGGER.error("Ugyldig input ved beregning av bidragsevne" + System.lineSeparator()
           + "Bidragsevne - grunnlag for beregning: " + grunnlagTilCore + System.lineSeparator()
-          + "Bidragsevne - avvik: " + resultatFraCore.getAvviksListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
-      throw new UgyldigInputException(resultatFraCore.getAvviksListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
+          + "Bidragsevne - avvik: " + resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
+      throw new UgyldigInputException(resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
     }
 
     LOGGER.debug("Bidragsevne - resultat av beregning: {}", resultatFraCore.getResultatPeriodeListe());
     return new HttpStatusResponse(HttpStatus.OK, new BeregnBidragsevneResultat(resultatFraCore));
   }
 
-  //Plukker ut aktuelle sjabloner og flytter inn i inputen til core-modulen
-  private List<SjablonPeriodeCore> mapSjablonVerdier(List<Sjablontall> sjablontallListe) {
-    return sjablontallListe
+  // Mapper sjabloner av typen sjablontall og flytter inn i inputen til core-modulen
+  private List<SjablonPeriodeCore> mapSjablonSjablontall(List<Sjablontall> sjablonSjablontallListe) {
+    return sjablonSjablontallListe
         .stream()
-        .map(sTL -> new SjablonPeriodeCore(new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()), sTL.getTypeSjablon(), sTL.getVerdi().doubleValue(),
-            1d))
+        .map(sTL -> new SjablonPeriodeCore(new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()), sjablontallMap.get(sTL.getTypeSjablon()),
+            sTL.getVerdi().doubleValue(), null))
         .collect(toList());
   }
 
-  private List<SjablonPeriodeCore> mapSjablonVerdierTemp() {
+  // Mapper sjabloner av typen bidragsevne og flytter inn i inputen til core-modulen
+  private List<SjablonPeriodeCore> mapSjablonBidragsevne(List<Bidragsevne> sjablonBidragsevneListe) {
 
-    var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2003-01-01"), LocalDate.parse("2003-12-31")),
-        "FordelSkatteklasse2", Double.valueOf(8848), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2013-01-01"), null),
-        "FordelSkatteklasse2", Double.valueOf(0), null));
+    var sjablonPeriodeCoreListe = new ArrayList<SjablonPeriodeCore>();
+    for (Bidragsevne sjablonBidragsevne : sjablonBidragsevneListe) {
+      if (sjablonBidragsevne.getBostatus().equals(ENSLIG)) {
+        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
+            "BoutgiftEnBelop", sjablonBidragsevne.getBelopBoutgift().doubleValue(), null));
+        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
+            "UnderholdEgetEnBelop", sjablonBidragsevne.getBelopUnderhold().doubleValue(), null));
+      }
+      if (sjablonBidragsevne.getBostatus().equals(GIFT_SAMBOER)) {
+        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
+            "BoutgiftGsBelop", sjablonBidragsevne.getBelopBoutgift().doubleValue(), null));
+        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
+            "UnderholdEgetGsBelop", sjablonBidragsevne.getBelopUnderhold().doubleValue(), null));
+      }
+    }
+    return sjablonPeriodeCoreListe;
+  }
 
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2003-01-01"), LocalDate.parse("2013-12-31")),
-        "SatsTrygdeavgift", Double.valueOf(7.8), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2014-01-01"), null),
-        "SatsTrygdeavgift", Double.valueOf(8.2), null));
+  // Mapper sjabloner av typen trinnvis skattesats og flytter inn i inputen til core-modulen
+  private List<SjablonPeriodeCore> mapSjablonTrinnvisSkattesats(List<TrinnvisSkattesats> sjablonTrinnvisSkattesatsListe) {
 
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "belopUnderholdEgneBarnIHusstand", Double.valueOf(3417), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "belopUnderholdEgneBarnIHusstand", Double.valueOf(3487), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2005-01-01"), LocalDate.parse("2005-05-31")),
-        "MinstefradragBelop", Double.valueOf(57400), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2017-07-01"), LocalDate.parse("2017-12-31")),
-        "MinstefradragBelop", Double.valueOf(75000), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-06-30")),
-        "MinstefradragBelop", Double.valueOf(75000), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "MinstefradragBelop", Double.valueOf(83000), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "MinstefradragBelop", Double.valueOf(85050), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("9999-12-31")),
-        "MinstefradragProsentInntekt", Double.valueOf(31), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "PersonfradragKlasse1", Double.valueOf(54750), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "PersonfradragKlasse1", Double.valueOf(56550), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "PersonfradragKlasse2", Double.valueOf(54750), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "PersonfradragKlasse2", Double.valueOf(56550), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")),
-        "FordelSaerfradrag", Double.valueOf(13132), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), null),
-        "FordelSaerfradrag", Double.valueOf(12977), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")), "Skattesats",
-        Double.valueOf(23), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), null), "Skattesats",
-        Double.valueOf(22), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")), "skattetrinn1",
-        Double.valueOf(169000), Double.valueOf(1.4)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")), "skattetrinn2",
-        Double.valueOf(237900), Double.valueOf(3.3)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")), "skattetrinn3",
-        Double.valueOf(598050), Double.valueOf(12.4)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-01-01"), LocalDate.parse("2018-12-31")), "skattetrinn4",
-        Double.valueOf(962050), Double.valueOf(15.4)));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), LocalDate.parse("2019-12-31")), "skattetrinn1",
-        Double.valueOf(174500), Double.valueOf(1.9)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), LocalDate.parse("2019-12-31")), "skattetrinn2",
-        Double.valueOf(245650), Double.valueOf(4.2)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), LocalDate.parse("2019-12-31")), "skattetrinn3",
-        Double.valueOf(617500), Double.valueOf(13.2)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-01-01"), LocalDate.parse("2019-12-31")), "skattetrinn4",
-        Double.valueOf(964800), Double.valueOf(16.2)));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2020-01-01"), null), "skattetrinn1",
-        Double.valueOf(180800), Double.valueOf(1.9)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2020-01-01"), null), "skattetrinn2",
-        Double.valueOf(254500), Double.valueOf(4.2)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2020-01-01"), null), "skattetrinn3",
-        Double.valueOf(639750), Double.valueOf(13.2)));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2020-01-01"), null), "skattetrinn4",
-        Double.valueOf(999550), Double.valueOf(16.2)));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "belopBoutgiftEn", Double.valueOf(9303), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "belopUnderholdEgetEn", Double.valueOf(8657), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "belopBoutgiftGs", Double.valueOf(5698), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-06-30")),
-        "belopUnderholdEgetGs", Double.valueOf(7330), null));
-
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "belopBoutgiftEn", Double.valueOf(9591), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "belopUnderholdEgetEn", Double.valueOf(8925), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "belopBoutgiftGs", Double.valueOf(5875), null));
-    sjablonPeriodeListe.add(new SjablonPeriodeCore(
-        new PeriodeCore(LocalDate.parse("2019-07-01"), null),
-        "belopUnderholdEgetGs", Double.valueOf(7557), null));
-
-    return sjablonPeriodeListe;
+    var sjablonPeriodeCoreListe = new ArrayList<SjablonPeriodeCore>();
+    var datoFom = LocalDate.MIN;
+    var datoTom = LocalDate.MIN;
+    var indeks = 0;
+    for (TrinnvisSkattesats sjablonTrinnvisSkattesats : sjablonTrinnvisSkattesatsListe) {
+      if (!(sjablonTrinnvisSkattesats.getDatoFom().equals(datoFom) && sjablonTrinnvisSkattesats.getDatoTom().equals(datoTom))) {
+        indeks = 0;
+        datoFom = sjablonTrinnvisSkattesats.getDatoFom();
+        datoTom = sjablonTrinnvisSkattesats.getDatoTom();
+      }
+      indeks++;
+      sjablonPeriodeCoreListe
+          .add(new SjablonPeriodeCore(new PeriodeCore(sjablonTrinnvisSkattesats.getDatoFom(), sjablonTrinnvisSkattesats.getDatoTom()),
+              "Skattetrinn" + indeks, sjablonTrinnvisSkattesats.getInntektgrense().doubleValue(), sjablonTrinnvisSkattesats.getSats().doubleValue()));
+    }
+    return sjablonPeriodeCoreListe;
   }
 }

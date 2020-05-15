@@ -5,18 +5,18 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class Sjablontall {
-  var typeSjablon: String? = null
+class TrinnvisSkattesats {
   var datoFom: LocalDate? = null
   var datoTom: LocalDate? = null
-  var verdi: BigDecimal? = null
+  var inntektgrense: BigDecimal? = null
+  var sats: BigDecimal? = null
 
   constructor() {}
 
-  constructor(typeSjablon: String?, datoFom: LocalDate?, datoTom: LocalDate?, verdi: BigDecimal?) {
-    this.typeSjablon = typeSjablon
+  constructor(datoFom: LocalDate?, datoTom: LocalDate?, inntektgrense: BigDecimal?, sats: BigDecimal?) {
     this.datoFom = datoFom
     this.datoTom = datoTom
-    this.verdi = verdi
+    this.inntektgrense = inntektgrense
+    this.sats = sats
   }
 }
