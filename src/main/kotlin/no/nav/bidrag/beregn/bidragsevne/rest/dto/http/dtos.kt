@@ -170,7 +170,7 @@ data class Inntekt(
 data class Sjablon(
     @ApiModelProperty(value = "Sjablon navn") var sjablonNavn: String,
     @ApiModelProperty(value = "Sjablon verdi 1") var sjablonVerdi1: Double,
-    @ApiModelProperty(value = "Sjablon verdi 2") var sjablonVerdi2: Double
+    @ApiModelProperty(value = "Sjablon verdi 2") var sjablonVerdi2: Double? = null
 ) {
   constructor(sjablon: SjablonCore) : this(
       sjablonNavn = sjablon.sjablonnavn,

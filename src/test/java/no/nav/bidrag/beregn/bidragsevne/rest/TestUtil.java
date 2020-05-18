@@ -7,7 +7,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import no.nav.bidrag.beregn.bidragsevne.rest.consumer.Bidragsevne;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.Sjablontall;
+import no.nav.bidrag.beregn.bidragsevne.rest.consumer.TrinnvisSkattesats;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.AntallBarnIEgetHusholdPeriode;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneGrunnlag;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneResultat;
@@ -36,20 +38,68 @@ import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonCore;
 
 public class TestUtil {
 
-  // Bygger opp liste av sjablonverdier
-  public static List<Sjablontall> dummySjablonListe() {
-    var sjablontallListe = new ArrayList<Sjablontall>();
-    sjablontallListe.add(new Sjablontall("0005", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(1600)));
-    sjablontallListe.add(new Sjablontall("0013", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(320)));
-    sjablontallListe.add(new Sjablontall("0033", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(270200)));
-    sjablontallListe.add(new Sjablontall("0034", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(419700)));
-    sjablontallListe.add(new Sjablontall("0035", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(336500)));
-    sjablontallListe.add(new Sjablontall("0036", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(61700)));
-    sjablontallListe.add(new Sjablontall("XXXX", LocalDate.MIN, LocalDate.MAX, BigDecimal.valueOf(0)));
-    return sjablontallListe;
+  // Bygger opp liste av sjabloner av typen Sjablontall
+  public static List<Sjablontall> dummySjablonSjablontallListe() {
+    var sjablonSjablontallListe = new ArrayList<Sjablontall>();
+    sjablonSjablontallListe.add(new Sjablontall("0004", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.ZERO));
+    sjablonSjablontallListe.add(new Sjablontall("0017", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(8.2)));
+    sjablonSjablontallListe.add(new Sjablontall("0019", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(3500)));
+    sjablonSjablontallListe.add(new Sjablontall("0023", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(85000)));
+    sjablonSjablontallListe.add(new Sjablontall("0025", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(31)));
+    sjablonSjablontallListe.add(new Sjablontall("0027", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(57000)));
+    sjablonSjablontallListe.add(new Sjablontall("0028", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(57000)));
+    sjablonSjablontallListe.add(new Sjablontall("0039", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(13000)));
+    sjablonSjablontallListe.add(new Sjablontall("0040", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(22)));
+
+    sjablonSjablontallListe.add(new Sjablontall("0004", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(1000)));
+    sjablonSjablontallListe.add(new Sjablontall("0017", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(9.2)));
+    sjablonSjablontallListe.add(new Sjablontall("0019", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(4000)));
+    sjablonSjablontallListe.add(new Sjablontall("0023", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(88000)));
+    sjablonSjablontallListe.add(new Sjablontall("0025", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(32)));
+    sjablonSjablontallListe.add(new Sjablontall("0027", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(58000)));
+    sjablonSjablontallListe.add(new Sjablontall("0028", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(60000)));
+    sjablonSjablontallListe.add(new Sjablontall("0039", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(14000)));
+    sjablonSjablontallListe.add(new Sjablontall("0040", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(23)));
+    return sjablonSjablontallListe;
   }
 
-  // Bygger opp BeregnBidragsevneGrunnlagCore
+  // Bygger opp liste av sjabloner av typen Bidragsevne
+  public static List<Bidragsevne> dummySjablonBidragsevneListe() {
+    var sjablonBidragsevneListe = new ArrayList<Bidragsevne>();
+    sjablonBidragsevneListe.add(
+        new Bidragsevne("EN", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(10000), BigDecimal.valueOf(9000)));
+    sjablonBidragsevneListe.add(
+        new Bidragsevne("EN", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(11000), BigDecimal.valueOf(10000)));
+    sjablonBidragsevneListe.add(
+        new Bidragsevne("GS", LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(6000), BigDecimal.valueOf(8000)));
+    sjablonBidragsevneListe.add(
+        new Bidragsevne("GS", LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(7000), BigDecimal.valueOf(9000)));
+    return sjablonBidragsevneListe;
+  }
+
+  // Bygger opp liste av sjabloner av typen TrinnvisSkattesats
+  public static List<TrinnvisSkattesats> dummySjablonTrinnvisSkattesatsListe() {
+    var sjablonTrinnvisSkattesatsListe = new ArrayList<TrinnvisSkattesats>();
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(190800), BigDecimal.valueOf(2.1)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(264500), BigDecimal.valueOf(4.4)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(180800), BigDecimal.valueOf(1.9)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(639750), BigDecimal.valueOf(13.2)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(254500), BigDecimal.valueOf(4.2)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2017-07-01"), LocalDate.parse("2018-07-01"), BigDecimal.valueOf(999550), BigDecimal.valueOf(16.2)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(649750), BigDecimal.valueOf(14.2)));
+    sjablonTrinnvisSkattesatsListe.add(
+        new TrinnvisSkattesats(LocalDate.parse("2018-07-01"), LocalDate.parse("2019-07-01"), BigDecimal.valueOf(999999), BigDecimal.valueOf(16.5)));
+    return sjablonTrinnvisSkattesatsListe;
+  }
+
+  // Bygger opp BeregnBidragsevneGrunnlagAltCore
   public static BeregnBidragsevneGrunnlagAltCore dummyBidragsevneGrunnlagCore() {
 
     var inntektPeriode = new InntektPeriodeCore(new PeriodeCore(LocalDate.parse("2017-01-01"), LocalDate.parse("2020-01-01")), "LØNNSINNTEKT", 0, 0d);
@@ -69,8 +119,8 @@ public class TestUtil {
     var saerfradragPeriodeListe = new ArrayList<SaerfradragPeriodeCore>();
     saerfradragPeriodeListe.add(saerfradragPeriode);
 
-    return new BeregnBidragsevneGrunnlagAltCore(LocalDate.parse("2017-01-01"), LocalDate.parse("2020-01-01"), emptyList(),
-        inntektPeriodeListe, bostatusPeriodeListe, antallBarnIEgetHusholdPeriodeListe, saerfradragPeriodeListe);
+    return new BeregnBidragsevneGrunnlagAltCore(LocalDate.parse("2017-01-01"), LocalDate.parse("2020-01-01"),
+        inntektPeriodeListe, bostatusPeriodeListe, antallBarnIEgetHusholdPeriodeListe, saerfradragPeriodeListe, emptyList());
   }
 
   // Bygger opp BeregnBidragsevneResultatCore
@@ -248,7 +298,8 @@ public class TestUtil {
       if (nullVerdi.equals("antallBarnIEgetHusholdDatoFraTil")) {
         antallBarnIEgetHusholdPeriode = new AntallBarnIEgetHusholdPeriode(null, antallBarn);
       } else {
-        antallBarnIEgetHusholdPeriode = new AntallBarnIEgetHusholdPeriode(new Periode(antallBarnIEgetHusholdDatoFra, antallBarnIEgetHusholdDatoTil), antallBarn);
+        antallBarnIEgetHusholdPeriode = new AntallBarnIEgetHusholdPeriode(new Periode(antallBarnIEgetHusholdDatoFra, antallBarnIEgetHusholdDatoTil),
+            antallBarn);
       }
       antallBarnIEgetHusholdPeriodeListe = new ArrayList<>();
       antallBarnIEgetHusholdPeriodeListe.add(antallBarnIEgetHusholdPeriode);
