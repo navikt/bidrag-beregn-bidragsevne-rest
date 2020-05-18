@@ -30,5 +30,5 @@
         <appender-ref ref="stdout_json" />
     </root>
 
-    <logger name="no.nav.bidrag.beregn.bidragsevne.rest" level="DEBUG"/>
+    <logger name="no.nav.bidrag.beregn.bidragsevne.rest" level="INFO"/>
 </configuration>
