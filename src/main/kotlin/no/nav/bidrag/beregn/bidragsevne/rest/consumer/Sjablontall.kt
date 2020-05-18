@@ -5,18 +5,9 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-class Sjablontall {
-  var typeSjablon: String? = null
-  var datoFom: LocalDate? = null
-  var datoTom: LocalDate? = null
-  var verdi: BigDecimal? = null
-
-  constructor() {}
-
-  constructor(typeSjablon: String?, datoFom: LocalDate?, datoTom: LocalDate?, verdi: BigDecimal?) {
-    this.typeSjablon = typeSjablon
-    this.datoFom = datoFom
-    this.datoTom = datoTom
-    this.verdi = verdi
-  }
-}
+data class Sjablontall (
+    var typeSjablon: String? = null,
+    var datoFom: LocalDate? = null,
+    var datoTom: LocalDate? = null,
+    var verdi: BigDecimal? = null
+)
