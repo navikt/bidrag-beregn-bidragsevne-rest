@@ -14,13 +14,6 @@
                 <stackTrace/>
             </providers>
         </encoder>
-        <layout class="ch.qos.logback.contrib.json.classic.JsonLayout">
-            <jsonFormatter
-                class="ch.qos.logback.contrib.jackson.JacksonJsonFormatter">
-                <prettyPrint>true</prettyPrint>
-            </jsonFormatter>
-            <timestampFormat>yyyy-MM-dd' 'HH:mm:ss.SSS</timestampFormat>
-        </layout>
     </appender>
 
     <springProfile name="test">
@@ -37,7 +30,5 @@
         <appender-ref ref="stdout_json" />
     </root>
 
-    <logger name="no.nav.bidrag.beregn.bidragsevne.rest" level="DEBUG">
-      <appender-ref ref="json" />
-    </logger>
+    <logger name="no.nav.bidrag.beregn.bidragsevne.rest" level="DEBUG"/>
 </configuration>

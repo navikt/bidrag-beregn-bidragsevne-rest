@@ -90,12 +90,14 @@ public class BeregnBidragsevneService {
   public HttpStatusResponse<BeregnBidragsevneResultat> beregn(BeregnBidragsevneGrunnlagAltCore grunnlagTilCore) {
 
     // Henter sjabloner for sjablontall
-    var sjablonTallResponse = sjablonConsumer.hentSjablonSjablontall();
+    var sjablonSjablontallResponse = sjablonConsumer.hentSjablonSjablontall();
 
-    if (!(sjablonTallResponse.getHttpStatus().is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}", sjablonTallResponse.getHttpStatus().toString());
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonTallResponse.getHttpStatus().toString()
-          + " Melding: " + sjablonTallResponse.getBody());
+    if (!(sjablonSjablontallResponse.getHttpStatus().is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}", sjablonSjablontallResponse.getHttpStatus().toString());
+      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonSjablontallResponse.getHttpStatus().toString()
+          + " Melding: " + sjablonSjablontallResponse.getBody());
+    } else {
+      LOGGER.debug("Antall sjabloner hentet av type Sjablontall: {}", sjablonSjablontallResponse.getBody().size());
     }
 
     // Henter sjabloner for bidragsevne
@@ -105,6 +107,8 @@ public class BeregnBidragsevneService {
       LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}", sjablonBidragsevneResponse.getHttpStatus().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (bidragsevne). Status: "
           + sjablonBidragsevneResponse.getHttpStatus().toString() + " Melding: " + sjablonBidragsevneResponse.getBody());
+    } else {
+      LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getBody().size());
     }
 
     // Henter sjabloner for trinnvis skattesats
@@ -114,11 +118,13 @@ public class BeregnBidragsevneService {
       LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}", sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: "
           + sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse.getBody());
+    } else {
+      LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getBody().size());
     }
 
     // Populerer liste over aktuelle sjabloner til core basert på sjablonene som er hentet
     var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
-    sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonTallResponse.getBody()));
+    sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonSjablontallResponse.getBody()));
     sjablonPeriodeListe.addAll(mapSjablonBidragsevne(sjablonBidragsevneResponse.getBody()));
     var sortertSjablonTrinnvisSkattesatsListe = sjablonTrinnvisSkattesatsResponse.getBody().stream().sorted(comparing(TrinnvisSkattesats::getDatoFom)
         .thenComparing(TrinnvisSkattesats::getDatoTom).thenComparing(TrinnvisSkattesats::getInntektgrense)).collect(toList());
