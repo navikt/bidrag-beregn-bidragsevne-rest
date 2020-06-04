@@ -120,7 +120,7 @@ public class TestUtil {
     saerfradragPeriodeListe.add(saerfradragPeriode);
 
     return new BeregnBidragsevneGrunnlagAltCore(LocalDate.parse("2017-01-01"), LocalDate.parse("2020-01-01"),
-        inntektPeriodeListe, bostatusPeriodeListe, antallBarnIEgetHusholdPeriodeListe, saerfradragPeriodeListe, emptyList());
+        inntektPeriodeListe, bostatusPeriodeListe, antallBarnIEgetHusholdPeriodeListe, saerfradragPeriodeListe, emptyList(), emptyList());
   }
 
   // Bygger opp BeregnBidragsevneResultatCore
