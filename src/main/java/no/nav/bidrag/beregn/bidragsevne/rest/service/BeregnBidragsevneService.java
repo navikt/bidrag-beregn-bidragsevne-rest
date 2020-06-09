@@ -28,7 +28,7 @@ import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCoreNy;
 import no.nav.bidrag.beregn.felles.enums.SjablonInnholdNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonNavn;
-import no.nav.bidrag.beregn.felles.enums.SjablonNoekkelNavn;
+import no.nav.bidrag.beregn.felles.enums.SjablonNokkelNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonTallNavn;
 import no.nav.bidrag.commons.web.HttpStatusResponse;
 import org.slf4j.Logger;
@@ -48,15 +48,15 @@ public class BeregnBidragsevneService {
   private final BidragsevneCore bidragsevneCore;
 
   private final Map<String, String> sjablontallMap = new HashMap<>() {{
-    put("0001", SjablonTallNavn.ORDINAER_BARNETRYGD_BELOEP.getNavn());
+    put("0001", SjablonTallNavn.ORDINAER_BARNETRYGD_BELOP.getNavn());
     put("0002", SjablonTallNavn.ORDINAER_SMAABARNSTILLEGG_BELOP.getNavn());
-    put("0003", SjablonTallNavn.BOUTGIFTER_BIDRAGSBARN_BELOEP.getNavn());
-    put("0004", SjablonTallNavn.FORDEL_SKATTEKLASSE2_BELOEP.getNavn());
-    put("0005", SjablonTallNavn.FORSKUDDSSATS_BELOEP.getNavn());
-    put("0006", SjablonTallNavn.INNSLAG_KAPITALINNTEKT_BELOEP.getNavn());
-    put("0007", SjablonTallNavn.INNTEKTSINTERVALL_TILLEGGSBIDRAG_BELOEP.getNavn());
+    put("0003", SjablonTallNavn.BOUTGIFTER_BIDRAGSBARN_BELOP.getNavn());
+    put("0004", SjablonTallNavn.FORDEL_SKATTEKLASSE2_BELOP.getNavn());
+    put("0005", SjablonTallNavn.FORSKUDDSSATS_BELOP.getNavn());
+    put("0006", SjablonTallNavn.INNSLAG_KAPITALINNTEKT_BELOP.getNavn());
+    put("0007", SjablonTallNavn.INNTEKTSINTERVALL_TILLEGGSBIDRAG_BELOP.getNavn());
     put("0008", SjablonTallNavn.MAKS_INNTEKT_BP_PROSENT.getNavn());
-    put("0009", SjablonTallNavn.HOEY_INNTEKT_BP_MULTIPLIKATOR.getNavn());
+    put("0009", SjablonTallNavn.HOY_INNTEKT_BP_MULTIPLIKATOR.getNavn());
     put("0010", SjablonTallNavn.INNTEKT_BB_MULTIPLIKATOR.getNavn());
     put("0011", SjablonTallNavn.MAKS_BIDRAG_MULTIPLIKATOR.getNavn());
     put("0012", SjablonTallNavn.MAKS_INNTEKT_BB_MULTIPLIKATOR.getNavn());
@@ -66,29 +66,29 @@ public class BeregnBidragsevneService {
     put("0016", SjablonTallNavn.TILLEGGSBIDRAG_PROSENT.getNavn());
     put("0017", SjablonTallNavn.TRYGDEAVGIFT_PROSENT.getNavn());
     put("0018", SjablonTallNavn.BARNETILLEGG_SKATT_PROSENT.getNavn());
-    put("0019", SjablonTallNavn.UNDERHOLD_EGNE_BARN_I_HUSSTAND_BELOEP.getNavn());
+    put("0019", SjablonTallNavn.UNDERHOLD_EGNE_BARN_I_HUSSTAND_BELOP.getNavn());
     put("0020", SjablonTallNavn.ENDRING_BIDRAG_GRENSE_PROSENT.getNavn());
-    put("0021", SjablonTallNavn.BARNETILLEGG_FORSVARET_FOERSTE_BARN_BELOEP.getNavn());
-    put("0022", SjablonTallNavn.BARNETILLEGG_FORSVARET_OEVRIGE_BARN_BELOEP.getNavn());
-    put("0023", SjablonTallNavn.MINSTEFRADRAG_INNTEKT_BELOEP.getNavn());
+    put("0021", SjablonTallNavn.BARNETILLEGG_FORSVARET_FORSTE_BARN_BELOP.getNavn());
+    put("0022", SjablonTallNavn.BARNETILLEGG_FORSVARET_OVRIGE_BARN_BELOP.getNavn());
+    put("0023", SjablonTallNavn.MINSTEFRADRAG_INNTEKT_BELOP.getNavn());
     put("0024", SjablonTallNavn.GJENNOMSNITT_VIRKEDAGER_PR_MAANED_ANTALL.getNavn());
     put("0025", SjablonTallNavn.MINSTEFRADRAG_INNTEKT_PROSENT.getNavn());
-    put("0026", SjablonTallNavn.DAGLIG_SATS_BARNETILLEGG_BELOEP.getNavn());
-    put("0027", SjablonTallNavn.PERSONFRADRAG_KLASSE1_BELOEP.getNavn());
-    put("0028", SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOEP.getNavn());
-    put("0029", SjablonTallNavn.KONTANTSTOETTE_BELOEP.getNavn());
-    put("0030", SjablonTallNavn.OEVRE_INNTEKTSGRENSE_IKKE_I_SKATTEPOSISJON_BELOEP.getNavn());
-    put("0031", SjablonTallNavn.NEDRE_INNTEKTSGRENSE_FULL_SKATTEPOSISJON_BELOEP.getNavn());
-    put("0032", SjablonTallNavn.EKSTRA_SMAABARNSTILLEGG_BELOEP.getNavn());
-    put("0033", SjablonTallNavn.OEVRE_INNTEKTSGRENSE_FULLT_FORSKUDD_BELOEP.getNavn());
-    put("0034", SjablonTallNavn.OEVRE_INNTEKTSGRENSE_75PROSENT_FORSKUDD_EN_BELOEP.getNavn());
-    put("0035", SjablonTallNavn.OEVRE_INNTEKTSGRENSE_75PROSENT_FORSKUDD_GS_BELOEP.getNavn());
-    put("0036", SjablonTallNavn.INNTEKTSINTERVALL_FORSKUDD_BELOEP.getNavn());
-    put("0037", SjablonTallNavn.OEVRE_GRENSE_SAERTILSKUDD_BELOEP.getNavn());
-    put("0038", SjablonTallNavn.FORSKUDDSSATS_75PROSENT_BELOEP.getNavn());
-    put("0039", SjablonTallNavn.FORDEL_SAERFRADRAG_BELOEP.getNavn());
+    put("0026", SjablonTallNavn.DAGLIG_SATS_BARNETILLEGG_BELOP.getNavn());
+    put("0027", SjablonTallNavn.PERSONFRADRAG_KLASSE1_BELOP.getNavn());
+    put("0028", SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOP.getNavn());
+    put("0029", SjablonTallNavn.KONTANTSTOTTE_BELOP.getNavn());
+    put("0030", SjablonTallNavn.OVRE_INNTEKTSGRENSE_IKKE_I_SKATTEPOSISJON_BELOP.getNavn());
+    put("0031", SjablonTallNavn.NEDRE_INNTEKTSGRENSE_FULL_SKATTEPOSISJON_BELOP.getNavn());
+    put("0032", SjablonTallNavn.EKSTRA_SMAABARNSTILLEGG_BELOP.getNavn());
+    put("0033", SjablonTallNavn.OVRE_INNTEKTSGRENSE_FULLT_FORSKUDD_BELOP.getNavn());
+    put("0034", SjablonTallNavn.OVRE_INNTEKTSGRENSE_75PROSENT_FORSKUDD_EN_BELOP.getNavn());
+    put("0035", SjablonTallNavn.OVRE_INNTEKTSGRENSE_75PROSENT_FORSKUDD_GS_BELOP.getNavn());
+    put("0036", SjablonTallNavn.INNTEKTSINTERVALL_FORSKUDD_BELOP.getNavn());
+    put("0037", SjablonTallNavn.OVRE_GRENSE_SAERTILSKUDD_BELOP.getNavn());
+    put("0038", SjablonTallNavn.FORSKUDDSSATS_75PROSENT_BELOP.getNavn());
+    put("0039", SjablonTallNavn.FORDEL_SAERFRADRAG_BELOP.getNavn());
     put("0040", SjablonTallNavn.SKATTESATS_ALMINNELIG_INNTEKT_PROSENT.getNavn());
-    put("0100", SjablonTallNavn.FASTSETTELSESGEBYR_BELOEP.getNavn());
+    put("0100", SjablonTallNavn.FASTSETTELSESGEBYR_BELOP.getNavn());
   }};
 
   public BeregnBidragsevneService(SjablonConsumer sjablonConsumer, BidragsevneCore bidragsevneCore) {
@@ -212,9 +212,9 @@ public class BeregnBidragsevneService {
         .map(sBL -> new SjablonPeriodeCoreNy(
             new PeriodeCore(sBL.getDatoFom(), sBL.getDatoTom()),
             SjablonNavn.BIDRAGSEVNE.getNavn(),
-            Arrays.asList(new SjablonNokkelCoreNy(SjablonNoekkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
-            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.BOUTGIFT_BELOEP.getNavn(), sBL.getBelopBoutgift().doubleValue()),
-                new SjablonInnholdCoreNy(SjablonInnholdNavn.UNDERHOLD_BELOEP.getNavn(), sBL.getBelopUnderhold().doubleValue()))))
+            Arrays.asList(new SjablonNokkelCoreNy(SjablonNokkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
+            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.BOUTGIFT_BELOP.getNavn(), sBL.getBelopBoutgift().doubleValue()),
+                new SjablonInnholdCoreNy(SjablonInnholdNavn.UNDERHOLD_BELOP.getNavn(), sBL.getBelopUnderhold().doubleValue()))))
         .collect(toList());
   }
 
@@ -248,7 +248,7 @@ public class BeregnBidragsevneService {
             new PeriodeCore(sTSL.getDatoFom(), sTSL.getDatoTom()),
             SjablonNavn.TRINNVIS_SKATTESATS.getNavn(),
             emptyList(),
-            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.INNTEKTSGRENSE_BELOEP.getNavn(), sTSL.getInntektgrense().doubleValue()),
+            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.INNTEKTSGRENSE_BELOP.getNavn(), sTSL.getInntektgrense().doubleValue()),
                 new SjablonInnholdCoreNy(SjablonInnholdNavn.SKATTESATS_PROSENT.getNavn(), sTSL.getSats().doubleValue()))))
         .collect(toList());
   }

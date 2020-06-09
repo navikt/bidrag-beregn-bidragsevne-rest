@@ -141,7 +141,7 @@ class BeregnBidragsevneServiceTest {
 
         // Sjekk at det mappes ut riktig verdi for en gitt sjablon av type Sjablontall
         () -> assertThat(grunnlagTilCore.getSjablonPeriodeListeNy().stream()
-            .filter(sjablonPeriodeCoreNy -> (sjablonPeriodeCoreNy.getSjablonNavn().equals(SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOEP.getNavn())) &&
+            .filter(sjablonPeriodeCoreNy -> (sjablonPeriodeCoreNy.getSjablonNavn().equals(SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOP.getNavn())) &&
                 (sjablonPeriodeCoreNy.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
             .map(SjablonPeriodeCoreNy::getSjablonInnholdListe)
             .flatMap(Collection::stream)
