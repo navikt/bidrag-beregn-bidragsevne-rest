@@ -33,8 +33,6 @@ data class BeregnBidragsevneGrunnlag(
       beregnDatoFra = if (beregnDatoFra != null) beregnDatoFra!! else throw UgyldigInputException("beregnDatoFra kan ikke være null"),
       beregnDatoTil = if (beregnDatoTil != null) beregnDatoTil!! else throw UgyldigInputException("beregnDatoTil kan ikke være null"),
 
-      sjablonPeriodeListe = emptyList(),
-
       inntektPeriodeListe = if (inntektPeriodeListe != null) inntektPeriodeListe.map { it.tilCore() }
       else throw UgyldigInputException("inntektPeriodeListe kan ikke være null"),
 
@@ -45,7 +43,10 @@ data class BeregnBidragsevneGrunnlag(
       else throw UgyldigInputException("antallBarnIEgetHusholdPeriodeListe kan ikke være null"),
 
       saerfradragPeriodeListe = if (saerfradragPeriodeListe != null) saerfradragPeriodeListe.map { it.tilCore() }
-      else throw UgyldigInputException("saerfradragPeriodeListe kan ikke være null")
+      else throw UgyldigInputException("saerfradragPeriodeListe kan ikke være null"),
+
+      sjablonPeriodeListe = emptyList(),
+      sjablonPeriodeListeNy = emptyList()
   )
 }
 
