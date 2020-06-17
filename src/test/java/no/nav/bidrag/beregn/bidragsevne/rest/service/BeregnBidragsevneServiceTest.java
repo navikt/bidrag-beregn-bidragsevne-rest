@@ -16,8 +16,8 @@ import no.nav.bidrag.beregn.bidragsevne.rest.exception.SjablonConsumerException;
 import no.nav.bidrag.beregn.bidragsevne.rest.exception.UgyldigInputException;
 import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneGrunnlagAltCore;
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCoreNy;
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCoreNy;
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCore;
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCore;
 import no.nav.bidrag.beregn.felles.enums.SjablonNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonTallNavn;
 import no.nav.bidrag.commons.web.HttpStatusResponse;
@@ -78,57 +78,6 @@ class BeregnBidragsevneServiceTest {
     var beregnBidragsevneResultat = beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore());
     var grunnlagTilCore = grunnlagTilCoreCaptor.getValue();
 
-    var forventetAntallSjablonElementer = TestUtil.dummySjablonSjablontallListe().size() + (TestUtil.dummySjablonBidragsevneListe().size() * 2)
-        + TestUtil.dummySjablonTrinnvisSkattesatsListe().size();
-    var forventetAntallBidragsevneElementerAvEnBestemtType = TestUtil.dummySjablonBidragsevneListe().size() / 2;
-    var forventetAntallTrinnvisSkattesatsSkattetrinnxElementer = TestUtil.dummySjablonTrinnvisSkattesatsListe().size() / 4;
-
-    assertAll(
-        () -> assertThat(beregnBidragsevneResultat.getHttpStatus()).isEqualTo(HttpStatus.OK),
-        () -> assertThat(beregnBidragsevneResultat.getBody()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe().size()).isEqualTo(1),
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().size()).isEqualTo(forventetAntallSjablonElementer),
-
-        // Sjekk at det mappes ut riktig navn og antall for en gitt sjablon av type Sjablontall
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
-            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonnavn().equals("MinstefradragInntektProsent")).count()).isEqualTo(2),
-
-        // Sjekk at det mappes ut riktig antall sjabloner av type Bidragsevne for en gitt verdi
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
-            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonnavn().contains("UnderholdEgetEn")).count())
-            .isEqualTo(forventetAntallBidragsevneElementerAvEnBestemtType),
-
-        // Sjekk at det riktig antall elementer med trinnvis skattesats sjablon "Skattetrinn 1"
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
-            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonnavn().equals("Skattetrinn1")).count())
-            .isEqualTo(forventetAntallTrinnvisSkattesatsSkattetrinnxElementer),
-
-        // Sjekk at det riktig antall elementer med trinnvis skattesats sjablon "Skattetrinn 4"
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
-            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonnavn().equals("Skattetrinn4")).count())
-            .isEqualTo(forventetAntallTrinnvisSkattesatsSkattetrinnxElementer),
-
-        // Sjekk at sorteringen er riktig for sjabloner med trinnvis skattesats
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
-            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonnavn().equals("Skattetrinn4")).findFirst().get().getSjablonVerdi1())
-            .isEqualTo(999550d)
-    );
-  }
-
-  @Test
-  @DisplayName("Skal ha korrekt sjablon-grunnlag når beregningsmodulen kalles (ny struktur")
-  void skalHaKorrektSjablonGrunnlagNårBeregningsmodulenKallesNyStruktur() {
-    var grunnlagTilCoreCaptor = ArgumentCaptor.forClass(BeregnBidragsevneGrunnlagAltCore.class);
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
-    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
-    when(sjablonConsumerMock.hentSjablonTrinnvisSkattesats())
-        .thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
-    when(bidragsevneCoreMock.beregnBidragsevne(grunnlagTilCoreCaptor.capture())).thenReturn(TestUtil.dummyBidragsevneResultatCore());
-
-    var beregnBidragsevneResultat = beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore());
-    var grunnlagTilCore = grunnlagTilCoreCaptor.getValue();
-
     var forventetAntallSjablonElementer = TestUtil.dummySjablonSjablontallListe().size() + TestUtil.dummySjablonBidragsevneListe().size()
         + TestUtil.dummySjablonTrinnvisSkattesatsListe().size();
 
@@ -137,38 +86,54 @@ class BeregnBidragsevneServiceTest {
         () -> assertThat(beregnBidragsevneResultat.getBody()).isNotNull(),
         () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe()).isNotNull(),
         () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe().size()).isEqualTo(1),
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListeNy().size()).isEqualTo(forventetAntallSjablonElementer),
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().size()).isEqualTo(forventetAntallSjablonElementer),
+
+        // Sjekk at det mappes ut riktig antall for en gitt sjablon av type Sjablontall
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonNavn().equals(SjablonTallNavn.MINSTEFRADRAG_INNTEKT_PROSENT.getNavn())).count())
+            .isEqualTo(TestUtil.dummySjablonSjablontallListe().stream()
+                .filter(sjablontall -> sjablontall.getTypeSjablon().equals("0025")).count()),
+
+        // Sjekk at det mappes ut riktig antall sjabloner av type Bidragsevne
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonNavn().equals(SjablonNavn.BIDRAGSEVNE.getNavn())).count())
+            .isEqualTo(TestUtil.dummySjablonBidragsevneListe().size()),
+
+        // Sjekk at det mappes ut riktig antall sjabloner av type Trinnvis Skattesats
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> sjablonPeriodeCore.getSjablonNavn().equals(SjablonNavn.TRINNVIS_SKATTESATS.getNavn())).count())
+            .isEqualTo(TestUtil.dummySjablonTrinnvisSkattesatsListe().size()),
 
         // Sjekk at det mappes ut riktig verdi for en gitt sjablon av type Sjablontall
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListeNy().stream()
-            .filter(sjablonPeriodeCoreNy -> (sjablonPeriodeCoreNy.getSjablonNavn().equals(SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOP.getNavn())) &&
-                (sjablonPeriodeCoreNy.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
-            .map(SjablonPeriodeCoreNy::getSjablonInnholdListe)
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> (sjablonPeriodeCore.getSjablonNavn().equals(SjablonTallNavn.PERSONFRADRAG_KLASSE2_BELOP.getNavn())) &&
+                (sjablonPeriodeCore.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
+            .map(SjablonPeriodeCore::getSjablonInnholdListe)
             .flatMap(Collection::stream)
             .findFirst()
-            .map(SjablonInnholdCoreNy::getSjablonInnholdVerdi)
+            .map(SjablonInnholdCore::getSjablonInnholdVerdi)
             .orElse(0d))
             .isEqualTo(57000d),
 
         // Sjekk at det mappes ut riktig verdi for en gitt sjablon av type Bidragsevne
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListeNy().stream()
-            .filter(sjablonPeriodeCoreNy -> (sjablonPeriodeCoreNy.getSjablonNavn().equals(SjablonNavn.BIDRAGSEVNE.getNavn())) &&
-                (sjablonPeriodeCoreNy.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
-            .map(SjablonPeriodeCoreNy::getSjablonInnholdListe)
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> (sjablonPeriodeCore.getSjablonNavn().equals(SjablonNavn.BIDRAGSEVNE.getNavn())) &&
+                (sjablonPeriodeCore.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
+            .map(SjablonPeriodeCore::getSjablonInnholdListe)
             .flatMap(Collection::stream)
             .findFirst()
-            .map(SjablonInnholdCoreNy::getSjablonInnholdVerdi)
+            .map(SjablonInnholdCore::getSjablonInnholdVerdi)
             .orElse(0d))
             .isEqualTo(10000d),
 
         // Sjekk at det mappes ut riktig verdi for en gitt sjablon av type TrinnvisSkattesats
-        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListeNy().stream()
-            .filter(sjablonPeriodeCoreNy -> (sjablonPeriodeCoreNy.getSjablonNavn().equals(SjablonNavn.TRINNVIS_SKATTESATS.getNavn())) &&
-                (sjablonPeriodeCoreNy.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
-            .map(SjablonPeriodeCoreNy::getSjablonInnholdListe)
+        () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().stream()
+            .filter(sjablonPeriodeCore -> (sjablonPeriodeCore.getSjablonNavn().equals(SjablonNavn.TRINNVIS_SKATTESATS.getNavn())) &&
+                (sjablonPeriodeCore.getSjablonPeriodeDatoFraTil().getPeriodeDatoFra().equals(LocalDate.parse("2017-07-01"))))
+            .map(SjablonPeriodeCore::getSjablonInnholdListe)
             .flatMap(Collection::stream)
             .findFirst()
-            .map(SjablonInnholdCoreNy::getSjablonInnholdVerdi)
+            .map(SjablonInnholdCore::getSjablonInnholdVerdi)
             .orElse(0d))
             .isEqualTo(180800d));
   }
