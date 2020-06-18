@@ -11,7 +11,7 @@
 
 	<groupId>no.nav.bidrag</groupId>
 	<artifactId>bidrag-beregn-bidragsevne-rest</artifactId>
-	<version>0.0.11-SNAPSHOT</version>
+	<version>0.0.12-SNAPSHOT</version>
 	<name>bidrag-beregn-bidragsevne-rest</name>
 	<description>Bidragsevneberegning</description>
 
