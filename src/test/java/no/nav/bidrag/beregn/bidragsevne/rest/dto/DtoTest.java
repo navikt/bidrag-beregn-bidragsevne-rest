@@ -67,19 +67,50 @@ class DtoTest {
   }
 
   @Test
-  @DisplayName("Skal kaste IllegalArgumentException når skatteklasse er null")
-  void skalKasteIllegalArgumentExceptionNaarSkatteklasseErNull() {
-    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklasse();
-    assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
-        .withMessage("skatteklasse kan ikke være null");
-  }
-
-  @Test
   @DisplayName("Skal kaste IllegalArgumentException når inntektBelop er null")
   void skalKasteIllegalArgumentExceptionNaarInntektBelopErNull() {
     var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenInntektBelop();
     assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
         .withMessage("inntektBelop kan ikke være null");
+  }
+
+  @Test
+  @DisplayName("Skal kaste IllegalArgumentException når skatteklassePeriodeListe er null")
+  void skalKasteIllegalArgumentExceptionNaarSkatteklassePeriodeListeErNull() {
+    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklassePeriodeListe();
+    assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
+        .withMessage("skatteklassePeriodeListe kan ikke være null");
+  }
+
+  @Test
+  @DisplayName("Skal kaste IllegalArgumentException når skatteklasseDatoFraTil er null")
+  void skalKasteIllegalArgumentExceptionNaarSkatteklasseDatoFraTilErNull() {
+    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklasseDatoFraTil();
+    assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
+        .withMessage("skatteklasseDatoFraTil kan ikke være null");
+  }
+
+  @Test
+  @DisplayName("Skal kaste IllegalArgumentException når skatteklasseDatoFra er null")
+  void skalKasteIllegalArgumentExceptionNaarSkatteklasseDatoFraErNull() {
+    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklasseDatoFra();
+    assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
+        .withMessage("periodeDatoFra kan ikke være null");
+  }
+
+  @Test
+  @DisplayName("Skal ikke kaste exception når skatteklasseDatoTil er null")
+  void skalIkkeKasteExceptionNaarSkatteklasseDatoTilErNull() {
+    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklasseDatoTil();
+    assertThatCode(grunnlag::tilCore).doesNotThrowAnyException();
+  }
+
+  @Test
+  @DisplayName("Skal kaste IllegalArgumentException når skatteklasse er null")
+  void skalKasteIllegalArgumentExceptionNaarSkatteklasseErNull() {
+    var grunnlag = TestUtil.byggBidragsevneGrunnlagUtenSkatteklasse();
+    assertThatExceptionOfType(UgyldigInputException.class).isThrownBy(grunnlag::tilCore)
+        .withMessage("skatteklasse kan ikke være null");
   }
 
   @Test

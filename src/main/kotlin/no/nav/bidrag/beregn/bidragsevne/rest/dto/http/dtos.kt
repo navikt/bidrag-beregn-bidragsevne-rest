@@ -15,6 +15,9 @@ import no.nav.bidrag.beregn.felles.bidragsevne.dto.ResultatGrunnlagCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.ResultatPeriodeCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SaerfradragPeriodeCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonCore
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCore
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonNokkelCore
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SkatteklassePeriodeCore
 import java.time.LocalDate
 
 
@@ -23,11 +26,12 @@ import java.time.LocalDate
 data class BeregnBidragsevneGrunnlag(
     @ApiModelProperty(value = "Beregn bidragsevne fra-dato") var beregnDatoFra: LocalDate? = null,
     @ApiModelProperty(value = "Beregn bidragsevne til-dato") var beregnDatoTil: LocalDate? = null,
-    @ApiModelProperty(value = "Periodisert liste over bidragmottakers inntekter") val inntektPeriodeListe: List<InntektPeriode>? = null,
-    @ApiModelProperty(value = "Periodisert liste over søknadsbarnets bostatus") val bostatusPeriodeListe: List<BostatusPeriode>? = null,
+    @ApiModelProperty(value = "Periodisert liste over bidragspliktiges inntekter") val inntektPeriodeListe: List<InntektPeriode>? = null,
+    @ApiModelProperty(value = "Periodisert liste over bidragspliktiges skatteklasse") val skatteklassePeriodeListe: List<SkatteklassePeriode>? = null,
+    @ApiModelProperty(value = "Periodisert liste over bidragspliktiges bostatus") val bostatusPeriodeListe: List<BostatusPeriode>? = null,
     @ApiModelProperty(
-        value = "Periodisert liste over antall barn i eget hushold") val antallBarnIEgetHusholdPeriodeListe: List<AntallBarnIEgetHusholdPeriode>? = null,
-    @ApiModelProperty(value = "Periodisert liste over særfradrag") val saerfradragPeriodeListe: List<SaerfradragPeriode>? = null
+        value = "Periodisert liste over antall barn i bidragspliktiges hushold") val antallBarnIEgetHusholdPeriodeListe: List<AntallBarnIEgetHusholdPeriode>? = null,
+    @ApiModelProperty(value = "Periodisert liste over bidragspliktiges særfradrag") val saerfradragPeriodeListe: List<SaerfradragPeriode>? = null
 ) {
   fun tilCore() = BeregnBidragsevneGrunnlagAltCore(
       beregnDatoFra = if (beregnDatoFra != null) beregnDatoFra!! else throw UgyldigInputException("beregnDatoFra kan ikke være null"),
@@ -35,6 +39,9 @@ data class BeregnBidragsevneGrunnlag(
 
       inntektPeriodeListe = if (inntektPeriodeListe != null) inntektPeriodeListe.map { it.tilCore() }
       else throw UgyldigInputException("inntektPeriodeListe kan ikke være null"),
+
+      skatteklassePeriodeListe = if (skatteklassePeriodeListe != null) skatteklassePeriodeListe.map { it.tilCore() }
+      else throw UgyldigInputException("skatteklassePeriodeListe kan ikke være null"),
 
       bostatusPeriodeListe = if (bostatusPeriodeListe != null) bostatusPeriodeListe.map { it.tilCore() }
       else throw UgyldigInputException("bostatusPeriodeListe kan ikke være null"),
@@ -45,31 +52,40 @@ data class BeregnBidragsevneGrunnlag(
       saerfradragPeriodeListe = if (saerfradragPeriodeListe != null) saerfradragPeriodeListe.map { it.tilCore() }
       else throw UgyldigInputException("saerfradragPeriodeListe kan ikke være null"),
 
-      sjablonPeriodeListe = emptyList(),
-      sjablonPeriodeListeNy = emptyList()
+      sjablonPeriodeListe = emptyList()
   )
 }
 
-@ApiModel(value = "Bidragsmottakers inntekt")
+@ApiModel(value = "Bidragspliktiges inntekt")
 data class InntektPeriode(
-    @ApiModelProperty(value = "Bidragsmottakers inntekt fra-til-dato") var inntektDatoFraTil: Periode? = null,
-    @ApiModelProperty(value = "Bidragsmottakers inntekt type") var inntektType: String? = null,
-    @ApiModelProperty(value = "Bidragsmottakers skatteklasse") var skatteklasse: Int? = null,
-    @ApiModelProperty(value = "Bidragsmottakers inntekt beløp") var inntektBelop: Double? = null
+    @ApiModelProperty(value = "Bidragspliktiges inntekt fra-til-dato") var inntektDatoFraTil: Periode? = null,
+    @ApiModelProperty(value = "Bidragspliktiges inntekt type") var inntektType: String? = null,
+    @ApiModelProperty(value = "Bidragspliktiges inntekt beløp") var inntektBelop: Double? = null
 ) {
   fun tilCore() = InntektPeriodeCore(
       inntektPeriodeDatoFraTil = if (inntektDatoFraTil != null) inntektDatoFraTil!!.tilCore() else throw UgyldigInputException(
           "inntektDatoFraTil kan ikke være null"),
       inntektType = if (inntektType != null) inntektType!! else throw UgyldigInputException("inntektType kan ikke være null"),
-      skatteklasse = if (skatteklasse != null) skatteklasse!! else throw UgyldigInputException("skatteklasse kan ikke være null"),
       inntektBelop = if (inntektBelop != null) inntektBelop!! else throw UgyldigInputException("inntektBelop kan ikke være null")
   )
 }
 
-@ApiModel(value = "Søknadsbarnets bostatus")
+@ApiModel(value = "Bidragspliktiges skatteklasse")
+data class SkatteklassePeriode(
+    @ApiModelProperty(value = "Bidragspliktiges skatteklasse fra-til-dato") var skatteklasseDatoFraTil: Periode? = null,
+    @ApiModelProperty(value = "Bidragspliktiges skatteklasse") var skatteklasse: Int? = null
+) {
+  fun tilCore() = SkatteklassePeriodeCore(
+      skatteklassePeriodeDatoFraTil = if (skatteklasseDatoFraTil != null) skatteklasseDatoFraTil!!.tilCore() else throw UgyldigInputException(
+          "skatteklasseDatoFraTil kan ikke være null"),
+      skatteklasse = if (skatteklasse != null) skatteklasse!! else throw UgyldigInputException("skatteklasse kan ikke være null")
+  )
+}
+
+@ApiModel(value = "Bidragspliktiges bostatus")
 data class BostatusPeriode(
-    @ApiModelProperty(value = "Søknadsbarnets bostatus fra-til-dato") var bostatusDatoFraTil: Periode? = null,
-    @ApiModelProperty(value = "Søknadsbarnets bostatuskode") var bostatusKode: String? = null
+    @ApiModelProperty(value = "Bidragspliktiges bostatus fra-til-dato") var bostatusDatoFraTil: Periode? = null,
+    @ApiModelProperty(value = "Bidragspliktiges bostatuskode") var bostatusKode: String? = null
 ) {
   fun tilCore() = BostatusPeriodeCore(
       bostatusPeriodeDatoFraTil = if (bostatusDatoFraTil != null) bostatusDatoFraTil!!.tilCore() else throw UgyldigInputException(
@@ -78,10 +94,10 @@ data class BostatusPeriode(
   )
 }
 
-@ApiModel(value = "Antall barn i eget hushold")
+@ApiModel(value = "Antall barn i bidragspliktiges hushold")
 data class AntallBarnIEgetHusholdPeriode(
-    @ApiModelProperty(value = "Antall barn i eget hushold fra-til-dato") var antallBarnIEgetHusholdDatoFraTil: Periode? = null,
-    @ApiModelProperty(value = "Antall barn i eget husholde") var antallBarn: Int? = null
+    @ApiModelProperty(value = "Antall barn i bidragspliktiges hushold fra-til-dato") var antallBarnIEgetHusholdDatoFraTil: Periode? = null,
+    @ApiModelProperty(value = "Antall barn i bidragspliktiges husholde") var antallBarn: Int? = null
 ) {
   fun tilCore() = AntallBarnIEgetHusholdPeriodeCore(
       antallBarnIEgetHusholdPeriodeDatoFraTil = if (antallBarnIEgetHusholdDatoFraTil != null) antallBarnIEgetHusholdDatoFraTil!!.tilCore()
@@ -91,10 +107,10 @@ data class AntallBarnIEgetHusholdPeriode(
   )
 }
 
-@ApiModel(value = "Særfradrag")
+@ApiModel(value = "Bidragspliktiges særfradrag")
 data class SaerfradragPeriode(
-    @ApiModelProperty(value = "Særfradrag fra-til-dato") var saerfradragDatoFraTil: Periode? = null,
-    @ApiModelProperty(value = "Særfradrag kode") var saerfradragKode: String? = null
+    @ApiModelProperty(value = "Bidragspliktiges særfradrag fra-til-dato") var saerfradragDatoFraTil: Periode? = null,
+    @ApiModelProperty(value = "Bidragspliktiges særfradrag kode") var saerfradragKode: String? = null
 ) {
   fun tilCore() = SaerfradragPeriodeCore(
       saerfradragPeriodeDatoFraTil = if (saerfradragDatoFraTil != null) saerfradragDatoFraTil!!.tilCore() else throw UgyldigInputException(
@@ -139,11 +155,11 @@ data class ResultatBeregning(
 
 @ApiModel(value = "Grunnlaget for en beregning")
 data class ResultatGrunnlag(
-    @ApiModelProperty(value = "Liste over bidragsmottakers inntekter") var inntektListe: List<Inntekt> = emptyList(),
-    @ApiModelProperty(value = "Skatteklasse") var skatteklasse: Int,
-    @ApiModelProperty(value = "Bostatuskode") var bostatusKode: String,
-    @ApiModelProperty(value = "Antall egne barn i husstand") var antallEgneBarnIHusstand: Int,
-    @ApiModelProperty(value = "Særfradragkode") var saerfradragKode: String,
+    @ApiModelProperty(value = "Liste over bidragspliktiges inntekter") var inntektListe: List<Inntekt> = emptyList(),
+    @ApiModelProperty(value = "Bidragspliktiges skatteklasse") var skatteklasse: Int,
+    @ApiModelProperty(value = "Bidragspliktiges bostatuskode") var bostatusKode: String,
+    @ApiModelProperty(value = "Antall egne barn i bidragspliktiges husstand") var antallEgneBarnIHusstand: Int,
+    @ApiModelProperty(value = "Bidragspliktiges særfradragkode") var saerfradragKode: String,
     @ApiModelProperty(value = "Liste over sjablonperioder") var sjablonListe: List<Sjablon> = emptyList()
 ) {
   constructor(resultatGrunnlag: ResultatGrunnlagCore) : this(
@@ -170,13 +186,35 @@ data class Inntekt(
 @ApiModel(value = "Sjablonverdier")
 data class Sjablon(
     @ApiModelProperty(value = "Sjablon navn") var sjablonNavn: String,
-    @ApiModelProperty(value = "Sjablon verdi 1") var sjablonVerdi1: Double,
-    @ApiModelProperty(value = "Sjablon verdi 2") var sjablonVerdi2: Double? = null
+    @ApiModelProperty(value = "Liste over sjablon nøkler") var sjablonNokkelListe: List<SjablonNokkel>,
+    @ApiModelProperty(value = "Liste over sjablon innhold") var sjablonInnholdListe: List<SjablonInnhold>
 ) {
   constructor(sjablon: SjablonCore) : this(
-      sjablonNavn = sjablon.sjablonnavn,
-      sjablonVerdi1 = sjablon.sjablonVerdi1,
-      sjablonVerdi2 = sjablon.sjablonVerdi2
+      sjablonNavn = sjablon.sjablonNavn,
+      sjablonNokkelListe = if (sjablon.sjablonNokkelListe != null) sjablon.sjablonNokkelListe!!.map { SjablonNokkel(it) } else emptyList(),
+      sjablonInnholdListe = sjablon.sjablonInnholdListe.map { SjablonInnhold(it) }
+  )
+}
+
+@ApiModel(value = "Sjablonnøkkel")
+data class SjablonNokkel(
+    @ApiModelProperty(value = "Sjablonnøkkel navn") var sjablonNokkelNavn: String,
+    @ApiModelProperty(value = "Sjablonnøkkel verdi") var sjablonNokkelVerdi: String
+) {
+  constructor(sjablonNokkel: SjablonNokkelCore) : this(
+      sjablonNokkelNavn = sjablonNokkel.sjablonNokkelNavn,
+      sjablonNokkelVerdi = sjablonNokkel.sjablonNokkelVerdi
+  )
+}
+
+@ApiModel(value = "Sjabloninnhold")
+data class SjablonInnhold(
+    @ApiModelProperty(value = "Sjabloninnhold navn") var sjablonInnholdNavn: String,
+    @ApiModelProperty(value = "Sjabloninnhold verdi") var sjablonInnholdVerdi: Double
+) {
+  constructor(sjablonInnhold: SjablonInnholdCore) : this(
+      sjablonInnholdNavn = sjablonInnhold.sjablonInnholdNavn,
+      sjablonInnholdVerdi = sjablonInnhold.sjablonInnholdVerdi
   )
 }
 

@@ -1,10 +1,8 @@
 package no.nav.bidrag.beregn.bidragsevne.rest.service;
 
 import static java.util.Collections.emptyList;
-import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,10 +20,9 @@ import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.AvvikCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneGrunnlagAltCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.PeriodeCore;
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCoreNy;
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonNokkelCoreNy;
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCore;
+import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonNokkelCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCore;
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonPeriodeCoreNy;
 import no.nav.bidrag.beregn.felles.enums.SjablonInnholdNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonNokkelNavn;
@@ -40,9 +37,6 @@ import org.springframework.stereotype.Service;
 public class BeregnBidragsevneService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(BeregnBidragsevneService.class);
-
-  private final static String ENSLIG = "EN";
-  private final static String GIFT_SAMBOER = "GS";
 
   private final SjablonConsumer sjablonConsumer;
   private final BidragsevneCore bidragsevneCore;
@@ -135,17 +129,8 @@ public class BeregnBidragsevneService {
     var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
     sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonSjablontallResponse.getBody()));
     sjablonPeriodeListe.addAll(mapSjablonBidragsevne(sjablonBidragsevneResponse.getBody()));
-    var sortertSjablonTrinnvisSkattesatsListe = sjablonTrinnvisSkattesatsResponse.getBody().stream().sorted(comparing(TrinnvisSkattesats::getDatoFom)
-        .thenComparing(TrinnvisSkattesats::getDatoTom).thenComparing(TrinnvisSkattesats::getInntektgrense)).collect(toList());
-    sjablonPeriodeListe.addAll(mapSjablonTrinnvisSkattesats(sortertSjablonTrinnvisSkattesatsListe));
+    sjablonPeriodeListe.addAll(mapSjablonTrinnvisSkattesats(sjablonTrinnvisSkattesatsResponse.getBody()));
     grunnlagTilCore.setSjablonPeriodeListe(sjablonPeriodeListe);
-
-    // Populerer liste over aktuelle sjabloner til core basert på sjablonene som er hentet (ny struktur)
-    var sjablonPeriodeListeNy = new ArrayList<SjablonPeriodeCoreNy>();
-    sjablonPeriodeListeNy.addAll(mapSjablonSjablontallNy(sjablonSjablontallResponse.getBody()));
-    sjablonPeriodeListeNy.addAll(mapSjablonBidragsevneNy(sjablonBidragsevneResponse.getBody()));
-    sjablonPeriodeListeNy.addAll(mapSjablonTrinnvisSkattesatsNy(sjablonTrinnvisSkattesatsResponse.getBody()));
-    grunnlagTilCore.setSjablonPeriodeListeNy(sjablonPeriodeListeNy);
 
     // Kaller core-modulen for beregning av bidragsevne
     LOGGER.debug("Bidragsevne - grunnlag for beregning: {}", grunnlagTilCore);
@@ -166,90 +151,39 @@ public class BeregnBidragsevneService {
   private List<SjablonPeriodeCore> mapSjablonSjablontall(List<Sjablontall> sjablonSjablontallListe) {
     return sjablonSjablontallListe
         .stream()
-        .map(sTL -> new SjablonPeriodeCore(new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()), sjablontallMap.get(sTL.getTypeSjablon()),
-            sTL.getVerdi().doubleValue(), null))
-        .collect(toList());
-  }
-
-  // Mapper sjabloner av typen sjablontall og flytter inn i inputen til core-modulen (ny struktur)
-  private List<SjablonPeriodeCoreNy> mapSjablonSjablontallNy(List<Sjablontall> sjablonSjablontallListe) {
-    return sjablonSjablontallListe
-        .stream()
-        .map(sTL -> new SjablonPeriodeCoreNy(
+        .map(sTL -> new SjablonPeriodeCore(
             new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()),
             sjablontallMap.get(sTL.getTypeSjablon()),
             emptyList(),
-            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.SJABLON_VERDI.getNavn(), sTL.getVerdi().doubleValue()))))
+            Arrays.asList(new SjablonInnholdCore(SjablonInnholdNavn.SJABLON_VERDI.getNavn(), sTL.getVerdi().doubleValue()))))
         .collect(toList());
   }
 
   // Mapper sjabloner av typen bidragsevne og flytter inn i inputen til core-modulen
   private List<SjablonPeriodeCore> mapSjablonBidragsevne(List<Bidragsevne> sjablonBidragsevneListe) {
 
-    var sjablonPeriodeCoreListe = new ArrayList<SjablonPeriodeCore>();
-    for (Bidragsevne sjablonBidragsevne : sjablonBidragsevneListe) {
-      if (sjablonBidragsevne.getBostatus().equals(ENSLIG)) {
-        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
-            "BoutgiftEnBelop", sjablonBidragsevne.getBelopBoutgift().doubleValue(), null));
-        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
-            "UnderholdEgetEnBelop", sjablonBidragsevne.getBelopUnderhold().doubleValue(), null));
-      }
-      if (sjablonBidragsevne.getBostatus().equals(GIFT_SAMBOER)) {
-        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
-            "BoutgiftGsBelop", sjablonBidragsevne.getBelopBoutgift().doubleValue(), null));
-        sjablonPeriodeCoreListe.add(new SjablonPeriodeCore(new PeriodeCore(sjablonBidragsevne.getDatoFom(), sjablonBidragsevne.getDatoTom()),
-            "UnderholdEgetGsBelop", sjablonBidragsevne.getBelopUnderhold().doubleValue(), null));
-      }
-    }
-    return sjablonPeriodeCoreListe;
-  }
-
-  // Mapper sjabloner av typen bidragsevne og flytter inn i inputen til core-modulen (ny struktur)
-  private List<SjablonPeriodeCoreNy> mapSjablonBidragsevneNy(List<Bidragsevne> sjablonBidragsevneListe) {
-
     return sjablonBidragsevneListe
         .stream()
-        .map(sBL -> new SjablonPeriodeCoreNy(
+        .map(sBL -> new SjablonPeriodeCore(
             new PeriodeCore(sBL.getDatoFom(), sBL.getDatoTom()),
             SjablonNavn.BIDRAGSEVNE.getNavn(),
-            Arrays.asList(new SjablonNokkelCoreNy(SjablonNokkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
-            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.BOUTGIFT_BELOP.getNavn(), sBL.getBelopBoutgift().doubleValue()),
-                new SjablonInnholdCoreNy(SjablonInnholdNavn.UNDERHOLD_BELOP.getNavn(), sBL.getBelopUnderhold().doubleValue()))))
+            Arrays.asList(new SjablonNokkelCore(SjablonNokkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
+            Arrays.asList(new SjablonInnholdCore(SjablonInnholdNavn.BOUTGIFT_BELOP.getNavn(), sBL.getBelopBoutgift().doubleValue()),
+                new SjablonInnholdCore(SjablonInnholdNavn.UNDERHOLD_BELOP.getNavn(), sBL.getBelopUnderhold().doubleValue()))))
         .collect(toList());
   }
 
   // Mapper sjabloner av typen trinnvis skattesats og flytter inn i inputen til core-modulen
   private List<SjablonPeriodeCore> mapSjablonTrinnvisSkattesats(List<TrinnvisSkattesats> sjablonTrinnvisSkattesatsListe) {
 
-    var sjablonPeriodeCoreListe = new ArrayList<SjablonPeriodeCore>();
-    var datoFom = LocalDate.MIN;
-    var datoTom = LocalDate.MIN;
-    var indeks = 0;
-    for (TrinnvisSkattesats sjablonTrinnvisSkattesats : sjablonTrinnvisSkattesatsListe) {
-      if (!(sjablonTrinnvisSkattesats.getDatoFom().equals(datoFom) && sjablonTrinnvisSkattesats.getDatoTom().equals(datoTom))) {
-        indeks = 0;
-        datoFom = sjablonTrinnvisSkattesats.getDatoFom();
-        datoTom = sjablonTrinnvisSkattesats.getDatoTom();
-      }
-      indeks++;
-      sjablonPeriodeCoreListe
-          .add(new SjablonPeriodeCore(new PeriodeCore(sjablonTrinnvisSkattesats.getDatoFom(), sjablonTrinnvisSkattesats.getDatoTom()),
-              "Skattetrinn" + indeks, sjablonTrinnvisSkattesats.getInntektgrense().doubleValue(), sjablonTrinnvisSkattesats.getSats().doubleValue()));
-    }
-    return sjablonPeriodeCoreListe;
-  }
-
-  // Mapper sjabloner av typen trinnvis skattesats og flytter inn i inputen til core-modulen (ny struktur)
-  private List<SjablonPeriodeCoreNy> mapSjablonTrinnvisSkattesatsNy(List<TrinnvisSkattesats> sjablonTrinnvisSkattesatsListe) {
-
     return sjablonTrinnvisSkattesatsListe
         .stream()
-        .map(sTSL -> new SjablonPeriodeCoreNy(
+        .map(sTSL -> new SjablonPeriodeCore(
             new PeriodeCore(sTSL.getDatoFom(), sTSL.getDatoTom()),
             SjablonNavn.TRINNVIS_SKATTESATS.getNavn(),
             emptyList(),
-            Arrays.asList(new SjablonInnholdCoreNy(SjablonInnholdNavn.INNTEKTSGRENSE_BELOP.getNavn(), sTSL.getInntektgrense().doubleValue()),
-                new SjablonInnholdCoreNy(SjablonInnholdNavn.SKATTESATS_PROSENT.getNavn(), sTSL.getSats().doubleValue()))))
+            Arrays.asList(new SjablonInnholdCore(SjablonInnholdNavn.INNTEKTSGRENSE_BELOP.getNavn(), sTSL.getInntektgrense().doubleValue()),
+                new SjablonInnholdCore(SjablonInnholdNavn.SKATTESATS_PROSENT.getNavn(), sTSL.getSats().doubleValue()))))
         .collect(toList());
   }
 }
