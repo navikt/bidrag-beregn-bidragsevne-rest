@@ -1,5 +1,7 @@
 package no.nav.bidrag.beregn.bidragsevne.rest.controller;
 
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneGrunnlag;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneResultat;
 import no.nav.bidrag.beregn.bidragsevne.rest.service.BeregnBidragsevneService;
@@ -19,7 +21,7 @@ public class BeregnBidragsevneController {
     this.beregnBidragsevneService = beregnBidragsevneService;
   }
 
-  @PostMapping(path = "/bidragsevne")
+  @PostMapping(path = "/bidragsevne", consumes = APPLICATION_JSON_VALUE)
   public ResponseEntity<BeregnBidragsevneResultat> beregnBidragsevne(@RequestBody BeregnBidragsevneGrunnlag beregnBidragsevneGrunnlag) {
     var resultat = beregnBidragsevneService.beregn(beregnBidragsevneGrunnlag.tilCore());
     return new ResponseEntity<>(resultat.getBody(), resultat.getHttpStatus());
