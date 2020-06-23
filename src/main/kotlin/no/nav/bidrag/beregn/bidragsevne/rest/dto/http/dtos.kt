@@ -9,15 +9,15 @@ import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneResultatCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BostatusPeriodeCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.InntektCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.InntektPeriodeCore
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.PeriodeCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.ResultatBeregningCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.ResultatGrunnlagCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.ResultatPeriodeCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SaerfradragPeriodeCore
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonCore
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonInnholdCore
-import no.nav.bidrag.beregn.felles.bidragsevne.dto.SjablonNokkelCore
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.SkatteklassePeriodeCore
+import no.nav.bidrag.beregn.felles.dto.PeriodeCore
+import no.nav.bidrag.beregn.felles.dto.SjablonCore
+import no.nav.bidrag.beregn.felles.dto.SjablonInnholdCore
+import no.nav.bidrag.beregn.felles.dto.SjablonNokkelCore
 import java.time.LocalDate
 
 
