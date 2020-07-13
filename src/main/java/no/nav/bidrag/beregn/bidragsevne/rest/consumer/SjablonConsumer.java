@@ -36,11 +36,11 @@ public class SjablonConsumer {
     }
 
     if (!(sjablonResponse.getStatusCode().is2xxSuccessful())) {
-      LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+      LOGGER.info("Status ({}) for hent sjablon sjablontall: ", sjablonResponse.getStatusCode());
       return new HttpStatusResponse(sjablonResponse.getStatusCode(), sjablonResponse.getHeaders().toString());
     }
 
-    LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+    LOGGER.info("Status ({}) for hent sjablon sjablontall: ", sjablonResponse.getStatusCode());
     return new HttpStatusResponse<>(sjablonResponse.getStatusCode(), sjablonResponse.getBody());
   }
 
@@ -52,11 +52,11 @@ public class SjablonConsumer {
     }
 
     if (!(sjablonResponse.getStatusCode().is2xxSuccessful())) {
-      LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+      LOGGER.info("Status ({}) for hent sjablon bidragsevne: ", sjablonResponse.getStatusCode());
       return new HttpStatusResponse(sjablonResponse.getStatusCode(), sjablonResponse.getHeaders().toString());
     }
 
-    LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+    LOGGER.info("Status ({}) for hent sjablon bidragsevne: ", sjablonResponse.getStatusCode());
     return new HttpStatusResponse<>(sjablonResponse.getStatusCode(), sjablonResponse.getBody());
   }
 
@@ -68,11 +68,11 @@ public class SjablonConsumer {
     }
 
     if (!(sjablonResponse.getStatusCode().is2xxSuccessful())) {
-      LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+      LOGGER.info("Status ({}) for hent sjablon trinnvis skattesats: ", sjablonResponse.getStatusCode());
       return new HttpStatusResponse(sjablonResponse.getStatusCode(), sjablonResponse.getHeaders().toString());
     }
 
-    LOGGER.info("Status ({}) for hent sjablontall: ", sjablonResponse.getStatusCode());
+    LOGGER.info("Status ({}) for hent sjablon trinnvis skattesats: ", sjablonResponse.getStatusCode());
     return new HttpStatusResponse<>(sjablonResponse.getStatusCode(), sjablonResponse.getBody());
   }
 }
