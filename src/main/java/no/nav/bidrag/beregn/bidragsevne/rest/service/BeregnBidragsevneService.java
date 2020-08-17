@@ -109,9 +109,11 @@ public class BeregnBidragsevneService {
     var sjablonBidragsevneResponse = sjablonConsumer.hentSjablonBidragsevne();
 
     if (!(sjablonBidragsevneResponse.is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}", sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString());
+      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}",
+          sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (bidragsevne). Status: "
-          + sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonBidragsevneResponse.getResponseEntity().getBody());
+          + sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonBidragsevneResponse.getResponseEntity()
+          .getBody());
     } else {
       LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getResponseEntity().getBody().size());
     }
@@ -120,9 +122,11 @@ public class BeregnBidragsevneService {
     var sjablonTrinnvisSkattesatsResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
 
     if (!(sjablonTrinnvisSkattesatsResponse.is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString());
+      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}",
+          sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: "
-          + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody());
+          + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse
+          .getResponseEntity().getBody());
     } else {
       LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody().size());
     }
@@ -139,10 +143,18 @@ public class BeregnBidragsevneService {
     var resultatFraCore = bidragsevneCore.beregnBidragsevne(grunnlagTilCore);
 
     if (!resultatFraCore.getAvvikListe().isEmpty()) {
-      LOGGER.error("Ugyldig input ved beregning av bidragsevne" + System.lineSeparator()
-          + "Bidragsevne - grunnlag for beregning: " + grunnlagTilCore + System.lineSeparator()
-          + "Bidragsevne - avvik: " + resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
-      throw new UgyldigInputException(resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
+      LOGGER.error("Ugyldig input ved beregning av bidragsevne. Følgende avvik ble funnet: " + System.lineSeparator()
+          + resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining(System.lineSeparator())));
+      LOGGER.info("Bidragsevne - grunnlag for beregning:" + System.lineSeparator()
+          + "beregnDatoFra= " + grunnlagTilCore.getBeregnDatoFra() + System.lineSeparator()
+          + "beregnDatoTil= " + grunnlagTilCore.getBeregnDatoTil() + System.lineSeparator()
+          + "antallBarnIEgetHusholdPeriodeListe= " + grunnlagTilCore.getAntallBarnIEgetHusholdPeriodeListe() + System.lineSeparator()
+          + "bostatusPeriodeListe= " + grunnlagTilCore.getBostatusPeriodeListe() + System.lineSeparator()
+          + "inntektPeriodeListe= " + grunnlagTilCore.getInntektPeriodeListe() + System.lineSeparator()
+          + "særfradragPeriodeListe= " + grunnlagTilCore.getSaerfradragPeriodeListe() + System.lineSeparator()
+          + "skatteklassePeriodeListe= " + grunnlagTilCore.getSkatteklassePeriodeListe());
+      throw new UgyldigInputException("Ugyldig input ved beregning av bidragsevne. Følgende avvik ble funnet: "
+          + resultatFraCore.getAvvikListe().stream().map(AvvikCore::getAvvikTekst).collect(Collectors.joining("; ")));
     }
 
     LOGGER.debug("Bidragsevne - resultat av beregning: {}", resultatFraCore.getResultatPeriodeListe());
