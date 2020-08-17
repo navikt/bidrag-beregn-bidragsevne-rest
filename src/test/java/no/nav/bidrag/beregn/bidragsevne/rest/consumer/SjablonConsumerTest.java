@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import no.nav.bidrag.beregn.bidragsevne.rest.TestUtil;
-import no.nav.bidrag.commons.web.HttpStatusResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,8 +44,12 @@ class SjablonConsumerTest {
 
     assertAll(
         () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getBody().size()).isEqualTo(TestUtil.dummySjablonSjablontallListe().size()),
-        () -> assertThat(sjablonResponse.getBody().get(0).getTypeSjablon()).isEqualTo(TestUtil.dummySjablonSjablontallListe().get(0).getTypeSjablon())
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.OK),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().size()).isEqualTo(TestUtil.dummySjablonSjablontallListe().size()),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().get(0).getTypeSjablon())
+            .isEqualTo(TestUtil.dummySjablonSjablontallListe().get(0).getTypeSjablon())
     );
   }
 
@@ -62,20 +65,13 @@ class SjablonConsumerTest {
         .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
     var sjablonResponse = sjablonConsumer.hentSjablonSjablontall();
 
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.SERVICE_UNAVAILABLE,
-            "[error code:\"503\", error msg:\"SERVICE_UNAVAILABLE\", error text:\"Service utilgjengelig\"]"));
-  }
-
-  @Test
-  @DisplayName("Skal returnere InternalServerError for Sjablontall når respons fra tjenesten er null")
-  void skalReturnereInternalServerErrorForSjablontallNårResponsFraTjenestenErNull() {
-    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Sjablontall>>) any()))
-        .thenReturn(null);
-    var sjablonResponse = sjablonConsumer.hentSjablonSjablontall();
-
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ukjent feil ved kall av bidrag-sjablon"));
+    assertAll(
+        () -> assertThat(sjablonResponse).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
+    );
   }
 
   @Test
@@ -87,8 +83,11 @@ class SjablonConsumerTest {
 
     assertAll(
         () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getBody().size()).isEqualTo(TestUtil.dummySjablonBidragsevneListe().size()),
-        () -> assertThat(sjablonResponse.getBody().get(0).getBelopBoutgift())
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.OK),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().size()).isEqualTo(TestUtil.dummySjablonBidragsevneListe().size()),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().get(0).getBelopBoutgift())
             .isEqualTo(TestUtil.dummySjablonBidragsevneListe().get(0).getBelopBoutgift())
     );
   }
@@ -105,20 +104,13 @@ class SjablonConsumerTest {
         .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
     var sjablonResponse = sjablonConsumer.hentSjablonBidragsevne();
 
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.SERVICE_UNAVAILABLE,
-            "[error code:\"503\", error msg:\"SERVICE_UNAVAILABLE\", error text:\"Service utilgjengelig\"]"));
-  }
-
-  @Test
-  @DisplayName("Skal returnere InternalServerError for Bidragsevne-sjabloner når respons fra tjenesten er null")
-  void skalReturnereInternalServerErrorForBidragsevneSjablonerNårResponsFraTjenestenErNull() {
-    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Bidragsevne>>) any()))
-        .thenReturn(null);
-    var sjablonResponse = sjablonConsumer.hentSjablonBidragsevne();
-
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ukjent feil ved kall av bidrag-sjablon"));
+    assertAll(
+        () -> assertThat(sjablonResponse).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
+    );
   }
 
   @Test
@@ -130,8 +122,11 @@ class SjablonConsumerTest {
 
     assertAll(
         () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getBody().size()).isEqualTo(TestUtil.dummySjablonTrinnvisSkattesatsListe().size()),
-        () -> assertThat(sjablonResponse.getBody().get(0).getInntektgrense())
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.OK),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().size()).isEqualTo(TestUtil.dummySjablonTrinnvisSkattesatsListe().size()),
+        () -> assertThat(sjablonResponse.getResponseEntity().getBody().get(0).getInntektgrense())
             .isEqualTo(TestUtil.dummySjablonTrinnvisSkattesatsListe().get(0).getInntektgrense())
     );
   }
@@ -148,19 +143,12 @@ class SjablonConsumerTest {
         .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
     var sjablonResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
 
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.SERVICE_UNAVAILABLE,
-            "[error code:\"503\", error msg:\"SERVICE_UNAVAILABLE\", error text:\"Service utilgjengelig\"]"));
-  }
-
-  @Test
-  @DisplayName("Skal returnere InternalServerError for TrinnvisSkattesats-sjabloner når respons fra tjenesten er null")
-  void skalReturnereInternalServerErrorForTrinnvisSkattesatsSjablonerNårResponsFraTjenestenErNull() {
-    when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<TrinnvisSkattesats>>) any()))
-        .thenReturn(null);
-    var sjablonResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
-
-    assertThat(sjablonResponse)
-        .isEqualToComparingFieldByField(new HttpStatusResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Ukjent feil ved kall av bidrag-sjablon"));
+    assertAll(
+        () -> assertThat(sjablonResponse).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
+        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
+    );
   }
 }

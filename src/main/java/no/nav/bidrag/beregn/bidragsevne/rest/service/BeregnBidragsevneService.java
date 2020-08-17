@@ -27,7 +27,7 @@ import no.nav.bidrag.beregn.felles.enums.SjablonInnholdNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonNokkelNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonTallNavn;
-import no.nav.bidrag.commons.web.HttpStatusResponse;
+import no.nav.bidrag.commons.web.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -90,46 +90,48 @@ public class BeregnBidragsevneService {
     this.bidragsevneCore = bidragsevneCore;
   }
 
-  public HttpStatusResponse<BeregnBidragsevneResultat> beregn(BeregnBidragsevneGrunnlagAltCore grunnlagTilCore) {
+  public HttpResponse<BeregnBidragsevneResultat> beregn(BeregnBidragsevneGrunnlagAltCore grunnlagTilCore) {
 
     // Henter sjabloner for sjablontall
     var sjablonSjablontallResponse = sjablonConsumer.hentSjablonSjablontall();
 
-    if (!(sjablonSjablontallResponse.getHttpStatus().is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}", sjablonSjablontallResponse.getHttpStatus().toString());
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonSjablontallResponse.getHttpStatus().toString()
-          + " Melding: " + sjablonSjablontallResponse.getBody());
+    if (!(sjablonSjablontallResponse.is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}",
+          sjablonSjablontallResponse.getResponseEntity().getStatusCode().toString());
+      throw new SjablonConsumerException(
+          "Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonSjablontallResponse.getResponseEntity().getStatusCode().toString()
+              + " Melding: " + sjablonSjablontallResponse.getResponseEntity().getBody());
     } else {
-      LOGGER.debug("Antall sjabloner hentet av type Sjablontall: {}", sjablonSjablontallResponse.getBody().size());
+      LOGGER.debug("Antall sjabloner hentet av type Sjablontall: {}", sjablonSjablontallResponse.getResponseEntity().getBody().size());
     }
 
     // Henter sjabloner for bidragsevne
     var sjablonBidragsevneResponse = sjablonConsumer.hentSjablonBidragsevne();
 
-    if (!(sjablonBidragsevneResponse.getHttpStatus().is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}", sjablonBidragsevneResponse.getHttpStatus().toString());
+    if (!(sjablonBidragsevneResponse.is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}", sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (bidragsevne). Status: "
-          + sjablonBidragsevneResponse.getHttpStatus().toString() + " Melding: " + sjablonBidragsevneResponse.getBody());
+          + sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonBidragsevneResponse.getResponseEntity().getBody());
     } else {
-      LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getBody().size());
+      LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getResponseEntity().getBody().size());
     }
 
     // Henter sjabloner for trinnvis skattesats
     var sjablonTrinnvisSkattesatsResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
 
-    if (!(sjablonTrinnvisSkattesatsResponse.getHttpStatus().is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}", sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString());
+    if (!(sjablonTrinnvisSkattesatsResponse.is2xxSuccessful())) {
+      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString());
       throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: "
-          + sjablonTrinnvisSkattesatsResponse.getHttpStatus().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse.getBody());
+          + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody());
     } else {
-      LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getBody().size());
+      LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody().size());
     }
 
     // Populerer liste over aktuelle sjabloner til core basert på sjablonene som er hentet
     var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
-    sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonSjablontallResponse.getBody()));
-    sjablonPeriodeListe.addAll(mapSjablonBidragsevne(sjablonBidragsevneResponse.getBody()));
-    sjablonPeriodeListe.addAll(mapSjablonTrinnvisSkattesats(sjablonTrinnvisSkattesatsResponse.getBody()));
+    sjablonPeriodeListe.addAll(mapSjablonSjablontall(sjablonSjablontallResponse.getResponseEntity().getBody()));
+    sjablonPeriodeListe.addAll(mapSjablonBidragsevne(sjablonBidragsevneResponse.getResponseEntity().getBody()));
+    sjablonPeriodeListe.addAll(mapSjablonTrinnvisSkattesats(sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody()));
     grunnlagTilCore.setSjablonPeriodeListe(sjablonPeriodeListe);
 
     // Kaller core-modulen for beregning av bidragsevne
@@ -144,7 +146,7 @@ public class BeregnBidragsevneService {
     }
 
     LOGGER.debug("Bidragsevne - resultat av beregning: {}", resultatFraCore.getResultatPeriodeListe());
-    return new HttpStatusResponse(HttpStatus.OK, new BeregnBidragsevneResultat(resultatFraCore));
+    return HttpResponse.from(HttpStatus.OK, new BeregnBidragsevneResultat(resultatFraCore));
   }
 
   // Mapper sjabloner av typen sjablontall og flytter inn i inputen til core-modulen

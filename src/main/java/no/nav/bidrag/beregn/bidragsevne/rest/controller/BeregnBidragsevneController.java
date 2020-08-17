@@ -24,6 +24,6 @@ public class BeregnBidragsevneController {
   @PostMapping(path = "/bidragsevne", consumes = APPLICATION_JSON_VALUE)
   public ResponseEntity<BeregnBidragsevneResultat> beregnBidragsevne(@RequestBody BeregnBidragsevneGrunnlag beregnBidragsevneGrunnlag) {
     var resultat = beregnBidragsevneService.beregn(beregnBidragsevneGrunnlag.tilCore());
-    return new ResponseEntity<>(resultat.getBody(), resultat.getHttpStatus());
+    return new ResponseEntity<>(resultat.getResponseEntity().getBody(), resultat.getResponseEntity().getStatusCode());
   }
 }
