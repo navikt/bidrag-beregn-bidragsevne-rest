@@ -14,7 +14,7 @@ import no.nav.bidrag.beregn.bidragsevne.rest.TestUtil;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneResultat;
 import no.nav.bidrag.beregn.bidragsevne.rest.service.BeregnBidragsevneService;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneGrunnlagAltCore;
-import no.nav.bidrag.commons.web.HttpStatusResponse;
+import no.nav.bidrag.commons.web.HttpResponse;
 import no.nav.bidrag.commons.web.test.HttpHeaderTestRestTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,7 +50,7 @@ class BeregnBidragsevneControllerTest {
   void skalReturnereBidragsevneResultatVedGyldigInput() {
 
     when(beregnBidragsevneServiceMock.beregn(any(BeregnBidragsevneGrunnlagAltCore.class)))
-        .thenReturn(new HttpStatusResponse(OK, TestUtil.dummyBidragsevneResultat()));
+        .thenReturn(HttpResponse.from(OK, TestUtil.dummyBidragsevneResultat()));
 
     var url = "http://localhost:" + port + "/bidrag-beregn-bidragsevne-rest/beregn/bidragsevne";
     var request = initHttpEntity(TestUtil.byggBidragsevneGrunnlag());
@@ -88,7 +88,7 @@ class BeregnBidragsevneControllerTest {
   void skalReturnere500InternalServerErrorNårKallTilServicenFeiler() {
 
     when(beregnBidragsevneServiceMock.beregn(any(BeregnBidragsevneGrunnlagAltCore.class)))
-        .thenReturn(new HttpStatusResponse(INTERNAL_SERVER_ERROR, null));
+        .thenReturn(HttpResponse.from(INTERNAL_SERVER_ERROR, null));
 
     var url = "http://localhost:" + port + "/bidrag-beregn-bidragsevne-rest/beregn/bidragsevne";
     var request = initHttpEntity(TestUtil.byggBidragsevneGrunnlag());

@@ -20,7 +20,7 @@ import no.nav.bidrag.beregn.felles.dto.SjablonInnholdCore;
 import no.nav.bidrag.beregn.felles.dto.SjablonPeriodeCore;
 import no.nav.bidrag.beregn.felles.enums.SjablonNavn;
 import no.nav.bidrag.beregn.felles.enums.SjablonTallNavn;
-import no.nav.bidrag.commons.web.HttpStatusResponse;
+import no.nav.bidrag.commons.web.HttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -29,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 @DisplayName("BeregnBidragsevneServiceTest")
 class BeregnBidragsevneServiceTest {
@@ -49,19 +50,19 @@ class BeregnBidragsevneServiceTest {
   @Test
   @DisplayName("Skal beregne bidragsevne når retur fra SjablonConsumer og BidragsevneCore er OK")
   void skalBeregneBidragsevneNårReturFraSjablonConsumerOgBidragsevneCoreErOk() {
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
-    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
+    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
+    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
     when(sjablonConsumerMock.hentSjablonTrinnvisSkattesats())
-        .thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
+        .thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
     when(bidragsevneCoreMock.beregnBidragsevne(any())).thenReturn(TestUtil.dummyBidragsevneResultatCore());
 
     var beregnBidragsevneResultat = beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore());
 
     assertAll(
-        () -> assertThat(beregnBidragsevneResultat.getHttpStatus()).isEqualTo(HttpStatus.OK),
-        () -> assertThat(beregnBidragsevneResultat.getBody()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe().size()).isEqualTo(1)
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.OK),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody()).isNotNull(),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody().getResultatPeriodeListe()).isNotNull(),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody().getResultatPeriodeListe().size()).isEqualTo(1)
     );
   }
 
@@ -69,10 +70,10 @@ class BeregnBidragsevneServiceTest {
   @DisplayName("Skal ha korrekt sjablon-grunnlag når beregningsmodulen kalles")
   void skalHaKorrektSjablonGrunnlagNårBeregningsmodulenKalles() {
     var grunnlagTilCoreCaptor = ArgumentCaptor.forClass(BeregnBidragsevneGrunnlagAltCore.class);
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
-    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
+    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
+    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
     when(sjablonConsumerMock.hentSjablonTrinnvisSkattesats())
-        .thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
+        .thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
     when(bidragsevneCoreMock.beregnBidragsevne(grunnlagTilCoreCaptor.capture())).thenReturn(TestUtil.dummyBidragsevneResultatCore());
 
     var beregnBidragsevneResultat = beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore());
@@ -82,10 +83,10 @@ class BeregnBidragsevneServiceTest {
         + TestUtil.dummySjablonTrinnvisSkattesatsListe().size();
 
     assertAll(
-        () -> assertThat(beregnBidragsevneResultat.getHttpStatus()).isEqualTo(HttpStatus.OK),
-        () -> assertThat(beregnBidragsevneResultat.getBody()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe()).isNotNull(),
-        () -> assertThat(beregnBidragsevneResultat.getBody().getResultatPeriodeListe().size()).isEqualTo(1),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.OK),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody()).isNotNull(),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody().getResultatPeriodeListe()).isNotNull(),
+        () -> assertThat(beregnBidragsevneResultat.getResponseEntity().getBody().getResultatPeriodeListe().size()).isEqualTo(1),
         () -> assertThat(grunnlagTilCore.getSjablonPeriodeListe().size()).isEqualTo(forventetAntallSjablonElementer),
 
         // Sjekk at det mappes ut riktig antall for en gitt sjablon av type Sjablontall
@@ -145,7 +146,7 @@ class BeregnBidragsevneServiceTest {
     body.put("error code", "503");
     body.put("error msg", "SERVICE_UNAVAILABLE");
     body.put("error text", "Service utilgjengelig");
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpStatusResponse(HttpStatus.SERVICE_UNAVAILABLE, body.toString()));
+    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpResponse(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE)));
 
     assertThatExceptionOfType(SjablonConsumerException.class)
         .isThrownBy(() -> beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore()))
@@ -156,10 +157,10 @@ class BeregnBidragsevneServiceTest {
   @Test
   @DisplayName("Skal kaste UgyldigInputException ved feil retur fra BidragsevneCore")
   void skalKasteUgyldigInputExceptionVedFeilReturFraBidragsevneCore() {
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
-    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
+    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
+    when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
     when(sjablonConsumerMock.hentSjablonTrinnvisSkattesats())
-        .thenReturn(new HttpStatusResponse<>(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
+        .thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonTrinnvisSkattesatsListe()));
     when(bidragsevneCoreMock.beregnBidragsevne(any())).thenReturn(TestUtil.dummyBidragsevneResultatCoreMedAvvik());
 
     assertThatExceptionOfType(UgyldigInputException.class)
