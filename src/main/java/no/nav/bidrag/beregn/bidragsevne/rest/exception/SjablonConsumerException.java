@@ -13,6 +13,6 @@ public class SjablonConsumerException extends RuntimeException {
 
   public SjablonConsumerException(RestClientResponseException exception) {
     super(exception);
-    this.statusCode = HttpStatus.valueOf(exception.getStatusText());
+    this.statusCode = HttpStatus.valueOf(exception.getRawStatusCode());
   }
 }
