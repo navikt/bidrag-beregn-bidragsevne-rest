@@ -72,20 +72,24 @@ class BeregnBidragsevneControllerTest {
 
   @Test
   @DisplayName("Skal returnere 400 Bad Request når input data mangler")
-  void skalReturnere400BadRequestNårInputDataMangler() {
+  void skalReturnere400BadRequestNaarInputDataMangler() {
 
     var url = "http://localhost:" + port + "/bidrag-beregn-bidragsevne-rest/beregn/bidragsevne";
     var request = initHttpEntity(TestUtil.byggBidragsevneGrunnlagUtenBostatusKode());
     var responseEntity = httpHeaderTestRestTemplate.exchange(url, HttpMethod.POST, request, BeregnBidragsevneResultat.class);
 
     assertAll(
-        () -> assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST)
+        () -> assertThat(responseEntity.getStatusCode()).isEqualTo(BAD_REQUEST),
+        () -> assertThat(responseEntity.getBody()).isNull(),
+        () -> assertThat(responseEntity.getHeaders()).isNotNull(),
+        () -> assertThat(responseEntity.getHeaders().getFirst("Error")).isNotNull(),
+        () -> assertThat(responseEntity.getHeaders().getFirst("Error")).isEqualTo("UgyldigInputException: bostatusKode kan ikke være null")
     );
   }
 
   @Test
   @DisplayName("Skal returnere 500 Internal Server Error når kall til servicen feiler")
-  void skalReturnere500InternalServerErrorNårKallTilServicenFeiler() {
+  void skalReturnere500InternalServerErrorNaarKallTilServicenFeiler() {
 
     when(beregnBidragsevneServiceMock.beregn(any(BeregnBidragsevneGrunnlagAltCore.class)))
         .thenReturn(HttpResponse.from(INTERNAL_SERVER_ERROR, null));

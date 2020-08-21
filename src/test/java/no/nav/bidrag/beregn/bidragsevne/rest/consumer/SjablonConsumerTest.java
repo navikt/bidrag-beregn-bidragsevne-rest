@@ -1,7 +1,7 @@
 package no.nav.bidrag.beregn.bidragsevne.rest.consumer;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import no.nav.bidrag.beregn.bidragsevne.rest.TestUtil;
+import no.nav.bidrag.beregn.bidragsevne.rest.exception.SjablonConsumerException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,8 +21,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +37,7 @@ class SjablonConsumerTest {
 
   @Test
   @DisplayName("Skal hente liste av Sjablontall når respons fra tjenesten er OK")
-  void skalHenteListeAvSjablontallNårResponsFraTjenestenErOk() {
+  void skalHenteListeAvSjablontallNaarResponsFraTjenestenErOk() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Sjablontall>>) any()))
         .thenReturn(new ResponseEntity<>(TestUtil.dummySjablonSjablontallListe(), HttpStatus.OK));
     var sjablonResponse = sjablonConsumer.hentSjablonSjablontall();
@@ -54,29 +54,17 @@ class SjablonConsumerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere mottatt status for Sjablontall når respons fra tjenesten ikke er OK")
-  void skalReturnereMottattStatusForSjablontallNårResponsFraTjenestenIkkeErOk() {
-    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-    body.put("error code", singletonList("503"));
-    body.put("error msg", singletonList("SERVICE_UNAVAILABLE"));
-    body.put("error text", singletonList("Service utilgjengelig"));
-
+  @DisplayName("Skal kaste SjablonConsumerException når respons fra tjenesten ikke er OK for Sjablontall")
+  void skalKasteRestClientExceptionNaarResponsFraTjenestenIkkeErOkForSjablontall() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Sjablontall>>) any()))
-        .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
-    var sjablonResponse = sjablonConsumer.hentSjablonSjablontall();
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-    assertAll(
-        () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
-    );
+    assertThatExceptionOfType(SjablonConsumerException.class).isThrownBy(() -> sjablonConsumer.hentSjablonSjablontall());
   }
 
   @Test
   @DisplayName("Skal hente liste av Bidragsevne-sjabloner når respons fra tjenesten er OK")
-  void skalHenteListeAvBidragsevneSjablonerNårResponsFraTjenestenErOk() {
+  void skalHenteListeAvBidragsevneSjablonerNaarResponsFraTjenestenErOk() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Bidragsevne>>) any()))
         .thenReturn(new ResponseEntity<>(TestUtil.dummySjablonBidragsevneListe(), HttpStatus.OK));
     var sjablonResponse = sjablonConsumer.hentSjablonBidragsevne();
@@ -93,29 +81,17 @@ class SjablonConsumerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere mottatt status for Bidragsevne-sjabloner når respons fra tjenesten ikke er OK")
-  void skalReturnereMottattStatusForBidragsevneSjablonerNårResponsFraTjenestenIkkeErOk() {
-    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-    body.put("error code", singletonList("503"));
-    body.put("error msg", singletonList("SERVICE_UNAVAILABLE"));
-    body.put("error text", singletonList("Service utilgjengelig"));
-
+  @DisplayName("Skal kaste SjablonConsumerException når respons fra tjenesten ikke er OK for Bidragsevne")
+  void skalKasteRestClientExceptionNaarResponsFraTjenestenIkkeErOkForBidragsevne() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<Bidragsevne>>) any()))
-        .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
-    var sjablonResponse = sjablonConsumer.hentSjablonBidragsevne();
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-    assertAll(
-        () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
-    );
+    assertThatExceptionOfType(SjablonConsumerException.class).isThrownBy(() -> sjablonConsumer.hentSjablonBidragsevne());
   }
 
   @Test
   @DisplayName("Skal hente liste av TrinnvisSkattesats-sjabloner når respons fra tjenesten er OK")
-  void skalHenteListeAvTrinnvisSkattesatsSjablonerNårResponsFraTjenestenErOk() {
+  void skalHenteListeAvTrinnvisSkattesatsSjablonerNaarResponsFraTjenestenErOk() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<TrinnvisSkattesats>>) any()))
         .thenReturn(new ResponseEntity<>(TestUtil.dummySjablonTrinnvisSkattesatsListe(), HttpStatus.OK));
     var sjablonResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
@@ -132,23 +108,11 @@ class SjablonConsumerTest {
   }
 
   @Test
-  @DisplayName("Skal returnere mottatt status for TrinnvisSkattesats-sjabloner når respons fra tjenesten ikke er OK")
-  void skalReturnereMottattStatusForTrinnvisSkattesatsSjablonerNårResponsFraTjenestenIkkeErOk() {
-    MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
-    body.put("error code", singletonList("503"));
-    body.put("error msg", singletonList("SERVICE_UNAVAILABLE"));
-    body.put("error text", singletonList("Service utilgjengelig"));
-
+  @DisplayName("Skal kaste SjablonConsumerException når respons fra tjenesten ikke er OK for TrinnvisSkattesats")
+  void skalKasteRestClientExceptionNaarResponsFraTjenestenIkkeErOkForTrinnvisSkattesats() {
     when(restTemplateMock.exchange(anyString(), eq(HttpMethod.GET), eq(null), (ParameterizedTypeReference<List<TrinnvisSkattesats>>) any()))
-        .thenReturn(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE));
-    var sjablonResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
+        .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR));
 
-    assertAll(
-        () -> assertThat(sjablonResponse).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getStatusCode()).isEqualTo(HttpStatus.SERVICE_UNAVAILABLE),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders()).isNotNull(),
-        () -> assertThat(sjablonResponse.getResponseEntity().getHeaders().toString()).contains("Service utilgjengelig")
-    );
+    assertThatExceptionOfType(SjablonConsumerException.class).isThrownBy(() -> sjablonConsumer.hentSjablonTrinnvisSkattesats());
   }
 }

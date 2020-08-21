@@ -8,11 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import no.nav.bidrag.beregn.bidragsevne.rest.TestUtil;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.SjablonConsumer;
-import no.nav.bidrag.beregn.bidragsevne.rest.exception.SjablonConsumerException;
 import no.nav.bidrag.beregn.bidragsevne.rest.exception.UgyldigInputException;
 import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneGrunnlagAltCore;
@@ -29,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 @DisplayName("BeregnBidragsevneServiceTest")
 class BeregnBidragsevneServiceTest {
@@ -49,7 +45,7 @@ class BeregnBidragsevneServiceTest {
 
   @Test
   @DisplayName("Skal beregne bidragsevne når retur fra SjablonConsumer og BidragsevneCore er OK")
-  void skalBeregneBidragsevneNårReturFraSjablonConsumerOgBidragsevneCoreErOk() {
+  void skalBeregneBidragsevneNaarReturFraSjablonConsumerOgBidragsevneCoreErOk() {
     when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
     when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
     when(sjablonConsumerMock.hentSjablonTrinnvisSkattesats())
@@ -68,7 +64,7 @@ class BeregnBidragsevneServiceTest {
 
   @Test
   @DisplayName("Skal ha korrekt sjablon-grunnlag når beregningsmodulen kalles")
-  void skalHaKorrektSjablonGrunnlagNårBeregningsmodulenKalles() {
+  void skalHaKorrektSjablonGrunnlagNaarBeregningsmodulenKalles() {
     var grunnlagTilCoreCaptor = ArgumentCaptor.forClass(BeregnBidragsevneGrunnlagAltCore.class);
     when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonSjablontallListe()));
     when(sjablonConsumerMock.hentSjablonBidragsevne()).thenReturn(HttpResponse.from(HttpStatus.OK, TestUtil.dummySjablonBidragsevneListe()));
@@ -138,21 +134,6 @@ class BeregnBidragsevneServiceTest {
             .orElse(0d))
             .isEqualTo(180800d));
   }
-
-  @Test
-  @DisplayName("Skal kaste SjablonConsumerException ved feil retur fra SjablonConsumer")
-  void skalKasteSjablonConsumerExceptionVedFeilReturFraSjablonConsumer() {
-    Map<String, String> body = new HashMap<>();
-    body.put("error code", "503");
-    body.put("error msg", "SERVICE_UNAVAILABLE");
-    body.put("error text", "Service utilgjengelig");
-    when(sjablonConsumerMock.hentSjablonSjablontall()).thenReturn(new HttpResponse(new ResponseEntity(body, HttpStatus.SERVICE_UNAVAILABLE)));
-
-    assertThatExceptionOfType(SjablonConsumerException.class)
-        .isThrownBy(() -> beregnBidragsevneService.beregn(TestUtil.dummyBidragsevneGrunnlagCore()))
-        .withMessageContaining("Feil ved kall av bidrag-sjablon (sjablontall). Status: " + HttpStatus.SERVICE_UNAVAILABLE + " Melding: ");
-  }
-
 
   @Test
   @DisplayName("Skal kaste UgyldigInputException ved feil retur fra BidragsevneCore")

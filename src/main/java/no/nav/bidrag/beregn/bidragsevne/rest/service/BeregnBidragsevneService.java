@@ -1,6 +1,7 @@
 package no.nav.bidrag.beregn.bidragsevne.rest.service;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import no.nav.bidrag.beregn.bidragsevne.rest.consumer.SjablonConsumer;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.Sjablontall;
 import no.nav.bidrag.beregn.bidragsevne.rest.consumer.TrinnvisSkattesats;
 import no.nav.bidrag.beregn.bidragsevne.rest.dto.http.BeregnBidragsevneResultat;
-import no.nav.bidrag.beregn.bidragsevne.rest.exception.SjablonConsumerException;
 import no.nav.bidrag.beregn.bidragsevne.rest.exception.UgyldigInputException;
 import no.nav.bidrag.beregn.felles.bidragsevne.BidragsevneCore;
 import no.nav.bidrag.beregn.felles.bidragsevne.dto.BeregnBidragsevneGrunnlagAltCore;
@@ -94,42 +94,15 @@ public class BeregnBidragsevneService {
 
     // Henter sjabloner for sjablontall
     var sjablonSjablontallResponse = sjablonConsumer.hentSjablonSjablontall();
-
-    if (!(sjablonSjablontallResponse.is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (sjablontall). Status: {}",
-          sjablonSjablontallResponse.getResponseEntity().getStatusCode().toString());
-      throw new SjablonConsumerException(
-          "Feil ved kall av bidrag-sjablon (sjablontall). Status: " + sjablonSjablontallResponse.getResponseEntity().getStatusCode().toString()
-              + " Melding: " + sjablonSjablontallResponse.getResponseEntity().getBody());
-    } else {
-      LOGGER.debug("Antall sjabloner hentet av type Sjablontall: {}", sjablonSjablontallResponse.getResponseEntity().getBody().size());
-    }
+    LOGGER.debug("Antall sjabloner hentet av type Sjablontall: {}", sjablonSjablontallResponse.getResponseEntity().getBody().size());
 
     // Henter sjabloner for bidragsevne
     var sjablonBidragsevneResponse = sjablonConsumer.hentSjablonBidragsevne();
-
-    if (!(sjablonBidragsevneResponse.is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (bidragsevne). Status: {}",
-          sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString());
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (bidragsevne). Status: "
-          + sjablonBidragsevneResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonBidragsevneResponse.getResponseEntity()
-          .getBody());
-    } else {
-      LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getResponseEntity().getBody().size());
-    }
+    LOGGER.debug("Antall sjabloner hentet av type Bidragsevne: {}", sjablonBidragsevneResponse.getResponseEntity().getBody().size());
 
     // Henter sjabloner for trinnvis skattesats
     var sjablonTrinnvisSkattesatsResponse = sjablonConsumer.hentSjablonTrinnvisSkattesats();
-
-    if (!(sjablonTrinnvisSkattesatsResponse.is2xxSuccessful())) {
-      LOGGER.error("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: {}",
-          sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString());
-      throw new SjablonConsumerException("Feil ved kall av bidrag-sjablon (trinnvis skattesats). Status: "
-          + sjablonTrinnvisSkattesatsResponse.getResponseEntity().getStatusCode().toString() + " Melding: " + sjablonTrinnvisSkattesatsResponse
-          .getResponseEntity().getBody());
-    } else {
-      LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody().size());
-    }
+    LOGGER.debug("Antall sjabloner hentet av type TrinnvisSkattesats: {}", sjablonTrinnvisSkattesatsResponse.getResponseEntity().getBody().size());
 
     // Populerer liste over aktuelle sjabloner til core basert på sjablonene som er hentet
     var sjablonPeriodeListe = new ArrayList<SjablonPeriodeCore>();
@@ -169,7 +142,7 @@ public class BeregnBidragsevneService {
             new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()),
             sjablontallMap.get(sTL.getTypeSjablon()),
             emptyList(),
-            Arrays.asList(new SjablonInnholdCore(SjablonInnholdNavn.SJABLON_VERDI.getNavn(), sTL.getVerdi().doubleValue()))))
+            singletonList(new SjablonInnholdCore(SjablonInnholdNavn.SJABLON_VERDI.getNavn(), sTL.getVerdi().doubleValue()))))
         .collect(toList());
   }
 
@@ -181,7 +154,7 @@ public class BeregnBidragsevneService {
         .map(sBL -> new SjablonPeriodeCore(
             new PeriodeCore(sBL.getDatoFom(), sBL.getDatoTom()),
             SjablonNavn.BIDRAGSEVNE.getNavn(),
-            Arrays.asList(new SjablonNokkelCore(SjablonNokkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
+            singletonList(new SjablonNokkelCore(SjablonNokkelNavn.BOSTATUS.getNavn(), sBL.getBostatus())),
             Arrays.asList(new SjablonInnholdCore(SjablonInnholdNavn.BOUTGIFT_BELOP.getNavn(), sBL.getBelopBoutgift().doubleValue()),
                 new SjablonInnholdCore(SjablonInnholdNavn.UNDERHOLD_BELOP.getNavn(), sBL.getBelopUnderhold().doubleValue()))))
         .collect(toList());
