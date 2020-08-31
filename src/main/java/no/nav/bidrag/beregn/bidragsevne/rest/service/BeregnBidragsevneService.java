@@ -82,6 +82,7 @@ public class BeregnBidragsevneService {
     put("0038", SjablonTallNavn.FORSKUDDSSATS_75PROSENT_BELOP.getNavn());
     put("0039", SjablonTallNavn.FORDEL_SAERFRADRAG_BELOP.getNavn());
     put("0040", SjablonTallNavn.SKATTESATS_ALMINNELIG_INNTEKT_PROSENT.getNavn());
+    put("0041", SjablonTallNavn.FORHOYET_BARNETRYGD_BELOP.getNavn());
     put("0100", SjablonTallNavn.FASTSETTELSESGEBYR_BELOP.getNavn());
   }};
 
@@ -140,7 +141,7 @@ public class BeregnBidragsevneService {
         .stream()
         .map(sTL -> new SjablonPeriodeCore(
             new PeriodeCore(sTL.getDatoFom(), sTL.getDatoTom()),
-            sjablontallMap.get(sTL.getTypeSjablon()),
+            sjablontallMap.getOrDefault(sTL.getTypeSjablon(), sTL.getTypeSjablon()),
             emptyList(),
             singletonList(new SjablonInnholdCore(SjablonInnholdNavn.SJABLON_VERDI.getNavn(), sTL.getVerdi().doubleValue()))))
         .collect(toList());
