@@ -1,7 +1,7 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: bidrag-beregn-bidragsevne-rest
+  name: {{ name }}
   namespace: {{ namespace }}
   labels:
     team: bidrag
@@ -28,10 +28,19 @@ spec:
       cpu: 500m
       memory: 512Mi
   ingresses:
-    - {{ ingress_preprod }}
-    - {{ ingress_nais }}
+    - {{ ingress }}
   vault:
     enabled: false
   env:
     - name: SJABLON_URL
       value: {{ sjablonurl }}
+
+  spec:
+    webproxy:
+      true
+
+  # only valid configuration for google cloud plattform
+  accesspolicy:
+    outbound:
+      rules:
+        - application: bidrag-sjablon
