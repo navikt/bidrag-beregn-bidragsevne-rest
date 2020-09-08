@@ -36,3 +36,9 @@ spec:
   env:
     - name: SJABLON_URL
       value: https://bidrag-sjablon.nais.adeo.no/bidrag-sjablon
+
+  # only valid configuration for google cloud platform
+  accesspolicy:
+    outbound:
+      rules:
+        - application: bidrag-sjablon
