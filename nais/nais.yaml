@@ -34,12 +34,10 @@ spec:
   env:
     - name: SJABLON_URL
       value: {{ sjablonurl }}
+  webproxy:
+    true
 
-  spec:
-    webproxy:
-      true
-
-  # only valid configuration for google cloud plattform
+  # only valid configuration for google cloud platform
   accesspolicy:
     outbound:
       rules:
