@@ -29,16 +29,12 @@ spec:
       cpu: 500m
       memory: 512Mi
   ingresses:
-    - https://bidrag-beregn-bidragsevne-rest.nais.adeo.no/
-    - https://bidrag-beregn-bidragsevne-rest.prod-fss.nais.io
-  vault:
-    enabled: false
+    - https://bidrag-beregn-bidragsevne-rest.dev.adeo.no/
   env:
     - name: SJABLON_URL
       value: https://bidrag-sjablon.nais.adeo.no/bidrag-sjablon
 
   # only valid configuration for google cloud platform
   accesspolicy:
-    outbound:
-      rules:
-        - application: bidrag-sjablon
+    external:
+      - host: https://bidrag-sjablon.nais.adeo.no

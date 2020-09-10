@@ -2,5 +2,6 @@
   "namespace": "bidrag",
   "name": "bidrag-beregn-bidragsevne-rest-feature",
   "ingress": "https://bidrag-beregn-bidragsevne-rest-feature.dev.adeo.no/",
-  "sjablonurl": "https://bidrag-sjablon-q1.dev-fss.nais.io/bidrag-sjablon"
+  "sjablon_endpoint": "/bidrag-sjablon",
+  "sjablon_host": "https://bidrag-sjablon-q1.dev-fss.nais.io"
 }

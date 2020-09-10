@@ -29,16 +29,14 @@ spec:
       memory: 512Mi
   ingresses:
     - {{ ingress }}
-  vault:
-    enabled: false
   env:
     - name: SJABLON_URL
-      value: {{ sjablonurl }}
+      value: {{ sjablon_host }}{{ sjablon_endpoint }}
   webproxy:
     true
 
   # only valid configuration for google cloud platform
   accesspolicy:
     outbound:
-      rules:
-        - application: bidrag-sjablon
+      external:
+        - host: {{ sjablon_host }}
