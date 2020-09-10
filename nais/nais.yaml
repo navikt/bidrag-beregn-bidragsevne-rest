@@ -32,8 +32,6 @@ spec:
   env:
     - name: SJABLON_URL
       value: {{ sjablon_host }}{{ sjablon_endpoint }}
-  webproxy:
-    true
 
   # only valid configuration for google cloud platform
   accesspolicy:
