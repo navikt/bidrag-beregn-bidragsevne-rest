@@ -3,5 +3,5 @@
   "name": "bidrag-beregn-bidragsevne-rest-feature",
   "ingress": "https://bidrag-beregn-bidragsevne-rest-feature.dev.adeo.no/",
   "sjablon_endpoint": "/bidrag-sjablon",
-  "sjablon_host": "https://bidrag-sjablon-q1.dev-fss.nais.io"
+  "sjablon_host": "https://api-gw-q1.oera.no"
 }

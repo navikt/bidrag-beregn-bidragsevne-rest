@@ -19,8 +19,12 @@ public class BidragBeregnBidragsevne {
   }
 
   @Bean
-  public SjablonConsumer sjablonConsumer(@Value("${SJABLON_URL}") String sjablonBaseUrl, RestTemplate restTemplate) {
-    return new SjablonConsumer(restTemplate, sjablonBaseUrl);
+  public SjablonConsumer sjablonConsumer(
+      @Value("${SJABLON_URL}") String sjablonBaseUrl,
+      RestTemplate restTemplate,
+      @Value("${NAV_API_KEY}") String navApiKey
+  ) {
+    return new SjablonConsumer(restTemplate, sjablonBaseUrl, navApiKey);
   }
 
   @Bean
@@ -34,6 +38,6 @@ public class BidragBeregnBidragsevne {
   }
 
   public static void main(String[] args) {
-		SpringApplication.run(BidragBeregnBidragsevne.class, args);
-	}
+    SpringApplication.run(BidragBeregnBidragsevne.class, args);
+  }
 }

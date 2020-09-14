@@ -29,6 +29,8 @@ spec:
       memory: 512Mi
   ingresses:
     - {{ ingress }}
+  envFrom:
+    - secret: nav-apikey
   env:
     - name: SJABLON_URL
       value: {{ sjablon_host }}{{ sjablon_endpoint }}
@@ -37,4 +39,4 @@ spec:
   accesspolicy:
     outbound:
       external:
-        - host: {{ sjablon_host }}
+        - host: api-gw-q1.oera.no
