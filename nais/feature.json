@@ -1,6 +1,7 @@
 {
-  "namespace": "q1",
-  "ingress_preprod": "https://bidrag-beregn-bidragsevne-rest-q1.nais.preprod.local/",
-  "ingress_nais": "https://bidrag-beregn-bidragsevne-rest-q1.dev-fss.nais.io/",
-  "sjablonurl": "https://bidrag-sjablon-q1.dev-fss.nais.io/bidrag-sjablon"
+  "namespace": "bidrag",
+  "name": "bidrag-beregn-bidragsevne-rest-feature",
+  "ingress": "https://bidrag-beregn-bidragsevne-rest-feature.dev.adeo.no/",
+  "sjablon_endpoint": "/bidrag-sjablon",
+  "sjablon_host": "https://api-gw-q1.oera.no"
 }
