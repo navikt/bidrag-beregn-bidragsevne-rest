@@ -1,8 +1,8 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: bidrag-beregn-bidragsevne-rest
-  namespace: {{ namespace }}
+  name: {{ name }}
+  namespace: bidrag
   labels:
     team: bidrag
 spec:
@@ -28,10 +28,13 @@ spec:
       cpu: 500m
       memory: 512Mi
   ingresses:
-    - {{ ingress_preprod }}
-    - {{ ingress_nais }}
+  {{#each ingresses as |url|}}
+    - {{url}}
+  {{/each}}
+  env:
+  {{#each env}}
+    - name: {{@key}}
+      value: "{{this}}"
+  {{/each}}
   vault:
     enabled: false
-  env:
-    - name: SJABLON_URL
-      value: {{ sjablonurl }}

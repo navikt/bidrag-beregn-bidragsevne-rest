@@ -1,6 +1,11 @@
 {
-  "namespace": "default",
-  "ingress_preprod": "https://bidrag-beregn-bidragsevne-rest.nais.preprod.local/",
-  "ingress_nais": "https://bidrag-beregn-bidragsevne-rest.dev-fss.nais.io/",
-  "sjablonurl": "https://bidrag-sjablon.dev-fss.nais.io/bidrag-sjablon"
+  "name": "bidrag-beregn-bidragsevne-rest",
+  "ingresses": [
+    "https://bidrag-beregn-bidragsevne-rest.nais.preprod.local/",
+    "https://bidrag-beregn-bidragsevne-rest.dev-fss.nais.io/",
+    "https://bidrag-beregn-bidragsevne-rest.dev.adeo.no/"
+  ],
+  "env": {
+    "SJABLON_URL": "https://bidrag-sjablon.dev-fss.nais.io/bidrag-sjablon"
+  }
 }

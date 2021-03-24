@@ -5,31 +5,31 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.3.4.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>2.4.1</version>
+		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 
 	<groupId>no.nav.bidrag</groupId>
 	<artifactId>bidrag-beregn-bidragsevne-rest</artifactId>
-	<version>0.0.29-SNAPSHOT</version>
+	<version>0.0.37-SNAPSHOT</version>
 	<name>bidrag-beregn-bidragsevne-rest</name>
 	<description>Bidragsevneberegning</description>
 
 	<properties>
     <!-- build -->
-    <build-helper-maven.version>3.1.0</build-helper-maven.version>
+    <build-helper-maven.version>3.2.0</build-helper-maven.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <!-- dependencies -->
-    <bidrag-commons.version>0.4.2</bidrag-commons.version>
+    <bidrag-commons.version>0.5.3.2</bidrag-commons.version>
     <bidrag-commons-test.version>0.2.1</bidrag-commons-test.version>
     <bidrag-beregn-felles.version>0.4.10</bidrag-beregn-felles.version>
     <springfox-swagger.version>2.9.2</springfox-swagger.version>
 
     <!-- language -->
     <java.version>15</java.version>
-    <kotlin.version>1.4.10</kotlin.version>
+    <kotlin.version>1.4.30</kotlin.version>
 	</properties>
 
 	<dependencies>
