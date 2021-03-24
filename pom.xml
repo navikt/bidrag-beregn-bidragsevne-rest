@@ -32,6 +32,17 @@
     <kotlin.version>1.4.30</kotlin.version>
 	</properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- vulnerable dependency overridden -->
+      <dependency>
+        <groupId>org.apache.tomcat.embed</groupId>
+        <artifactId>tomcat-embed-core</artifactId>
+        <version>9.0.43</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
 	<dependencies>
     <dependency>
       <groupId>no.nav.bidrag</groupId>
@@ -52,7 +63,6 @@
       <version>${bidrag-commons-test.version}</version>
       <scope>test</scope>
     </dependency>
-
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
